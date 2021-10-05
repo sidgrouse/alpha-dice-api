@@ -1,11 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { INVOICE_REPOSITORY } from 'src/constants';
-import { InvoiceStatus } from './invoice-status';
+import { Injectable } from '@nestjs/common';
 import { Invoice } from './invoice.entity';
 import { InvoiceDto } from 'src/dto/invoice.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateInvoiceDto } from 'src/dto/create-invoice.dto';
+import { InvoiceStatus } from 'src/constants/invoice-status';
 
 @Injectable()
 export class InvoiceService {
@@ -15,12 +14,12 @@ export class InvoiceService {
       ) {}
       
     async addInvoice(dto: CreateInvoiceDto): Promise<InvoiceDto> {
-        let invoice = new Invoice();
+        const invoice = new Invoice();
         invoice.pledjeId = dto.pledjeId;
         invoice.userId = dto.userId;
-        invoice.status = InvoiceStatus.noInfo;
+        invoice.status = InvoiceStatus.NO_INFO;
         
-        let ret = await this.invoiceRepository.save(invoice);
+        const ret = await this.invoiceRepository.save(invoice);
         return new InvoiceDto(ret.id, ret.userId, ret.pledjeId, ret.status);
     }
 
