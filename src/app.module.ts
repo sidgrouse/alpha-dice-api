@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DB_NAME } from './constants';
 import { InvoicesModule } from './invoice/invoices.module';
 import { Invoice } from './invoice/invoice.entity';
+import { TelegramModule } from './telegram/telegram.module';
 
 @Module({
   imports: [
@@ -19,8 +18,7 @@ import { Invoice } from './invoice/invoice.entity';
       synchronize: true
     }),
     InvoicesModule,
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+    TelegramModule
+  ]
 })
 export class AppModule {}
