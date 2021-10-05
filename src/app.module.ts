@@ -4,6 +4,8 @@ import { DB_NAME } from './constants';
 import { InvoicesModule } from './invoice/invoices.module';
 import { Invoice } from './invoice/invoice.entity';
 import { TelegramModule } from './telegram/telegram.module';
+import { ConfigModule } from '@nestjs/config';
+import { ActionsModule } from './actions/actions.module';
 
 @Module({
   imports: [
@@ -18,7 +20,8 @@ import { TelegramModule } from './telegram/telegram.module';
       synchronize: true
     }),
     InvoicesModule,
-    TelegramModule
+    TelegramModule,
+    ActionsModule
   ]
 })
 export class AppModule {}

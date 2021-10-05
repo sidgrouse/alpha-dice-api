@@ -1,13 +1,14 @@
 import { Telegraf } from 'telegraf';
 import {Injectable} from '@nestjs/common';
 import { User } from 'telegraf/typings/core/types/typegram';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TelegramService {
     private bot: Telegraf<any>;
 
-    constructor() {
-        const botToken: string = '1865828167:AAGQj5oBLMYfUOHnHiX5JJiKZRSEsXNS_LY';
+    constructor(private config: ConfigService) {
+        const botToken: string = this.config.get('TELEGRAM_BOT_TOKEN');
 
         this.bot = new Telegraf(botToken);
         this.bot.start(ctx => ctx.reply('Welcome'));
