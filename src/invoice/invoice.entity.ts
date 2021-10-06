@@ -1,5 +1,5 @@
-import { InvoiceStatus } from 'src/constants/invoice-status';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { InvoiceStatus } from "./invoice-status";
 
 @Entity()
 export class Invoice{
