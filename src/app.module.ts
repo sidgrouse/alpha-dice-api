@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DB_NAME } from './constants';
 import { InvoicesModule } from './invoice/invoices.module';
 import { Invoice } from './invoice/invoice.entity';
+import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksService } from './task.service';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -19,8 +21,8 @@ import { Invoice } from './invoice/invoice.entity';
       synchronize: true
     }),
     InvoicesModule,
+    ConfigModule
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  providers: [TasksService]
 })
 export class AppModule {}
