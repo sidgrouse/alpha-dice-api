@@ -1,21 +1,20 @@
-import { ExecutionContext, UseGuards } from '@nestjs/common';
-import {Update, Ctx, Start, Help, Command, Message, TelegrafExecutionContext, Scene, SceneEnter, On, Hears, } from 'nestjs-telegraf';
-import { AdminGuard } from 'src/common/guards/admin.guard';
+import {Update, Ctx, Start, Help, Command, Message, TelegrafExecutionContext, Scene, SceneEnter, On, Hears, TelegrafException, } from 'nestjs-telegraf';
+import { SceneCtx } from 'src/common/scene-context.interface';
 import { SceneNames } from 'src/constants';
-import { InvoiceDto } from 'src/dto/invoice.dto';
-import { Context } from 'telegraf';
-import { SceneContext } from 'telegraf/typings/scenes/context';
+import { CreateInvoiceDto } from 'src/dto/create-invoice.dto';
 import { InvoiceService } from './invoice.service';
   
   @Scene(SceneNames.ADD_INVOICES)
   export class AddInvoiceTgSceneController {
-    constructor(){}
+    private _invoiceBuffer: CreateInvoiceDto[];
+    constructor(private _invoiceService: InvoiceService){
+      
+    }
 
   @SceneEnter()
-  ////@UseGuards(AdminGuard)
   onSceneEnter(): string {
-    console.log('Enter to scene');
-    return 'Welcome on scene ✋ \n Send me invoices in format nickname:pledgeid';
+    this._invoiceBuffer = [];
+    return "Send me invoices in format nickname:pledgeid \n/save - save sent invoices. DON'T FORGET TO DO IT!  \n/leave - back to the main menu";
   }
 
     @Help()
@@ -23,20 +22,35 @@ import { InvoiceService } from './invoice.service';
       return 'Send me invoices in format nickname:pledgeid';
     }
 
-    @On('text')
-    async onMessage(@Message() message : string){
-      return message;
+    @Command('save')
+    async onSave() {
+      await this._invoiceBuffer.forEach(async itm => await this._invoiceService.addInvoice(itm));
+      //console.log(ret);
+      return 'saved';
     }
-
-    async onGetInfo(@Ctx() context: Context) : Promise<void>{
-      const userName = context.from.username;
-      //const ret = await this.invoiceService.getAllInvoices();
-      //return JSON.stringify(ret.every(itm => itm.userId === userName));
-    }
-
 
     @Command('leave')
-    async onAddInvoice(@Ctx() context: SceneContext) {
+    async onAddInvoice(@Ctx() context: SceneCtx) {
       await context.scene.leave();
+      return 'back to main menu';
+    }
+
+    @On('text')
+    async onMessage(@Message() messageObject : any){
+      const message : string = messageObject.text;
+      if(message.startsWith('/')){
+        return;
+      }
+
+      const invoiceStrs = message.split(' ');
+      invoiceStrs.forEach(str => {
+        const invoiceElements = str.split(':');
+        if(invoiceElements.length !== 2){
+          throw new TelegrafException('Wrong format');
+        }
+        const dto = new CreateInvoiceDto( invoiceElements[0], Number.parseInt(invoiceElements[1]));
+        this._invoiceBuffer.push(dto);
+      });
+      return this._invoiceBuffer.map(itm => `${itm.userId} (${itm.pledjeId})`).join('\n');
     }
   }

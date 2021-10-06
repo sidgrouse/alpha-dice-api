@@ -31,7 +31,7 @@ import { InvoiceService } from './invoice.service';
 
 
     @Command('add_invoice')
-    ////@UseGuards(AdminGuard)
+    @UseGuards(AdminGuard)
     async onAddInvoice(@Ctx() context: SceneCtx) {
       await context.scene.enter(SceneNames.ADD_INVOICES);
     }
