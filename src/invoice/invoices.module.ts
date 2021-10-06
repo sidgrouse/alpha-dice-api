@@ -22,6 +22,7 @@ import { sessionMiddleware } from 'src/common/middleware';
   })],
   providers: [InvoiceService, InvoiceTgController, AddInvoiceTgSceneController],
   controllers: [InvoiceController],
+  exports: [InvoiceService]
 })
 @Module({})
 export class InvoicesModule {}

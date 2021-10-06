@@ -4,9 +4,12 @@ import { DB_NAME } from './constants';
 import { InvoicesModule } from './invoice/invoices.module';
 import { Invoice } from './invoice/invoice.entity';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksService } from './task.service';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -19,6 +22,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     InvoicesModule,
     ConfigModule
-  ]
+  ],
+  providers: [TasksService]
 })
 export class AppModule {}
