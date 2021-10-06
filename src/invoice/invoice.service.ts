@@ -26,4 +26,8 @@ export class InvoiceService {
     async getAllInvoices(): Promise<InvoiceDto[]> {
         return await this.invoiceRepository.find();
     }
+    
+    async getAllUserInvoices(userId: string): Promise<InvoiceDto[]> {
+        return await this.invoiceRepository.find({userId: userId})
+    }
 }
