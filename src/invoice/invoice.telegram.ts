@@ -13,8 +13,9 @@ import { InvoiceService } from './invoice.service';
     constructor(private readonly invoiceService: InvoiceService){}
 
     @Start()
-    async onStart(): Promise<string> {
-      return "Hey, I'm an alpha dice bot";
+    async onStart(@Ctx() ctx : Context): Promise<string> {
+      this.invoiceService.addUser(ctx.from.username, ctx.from.id);
+      return "Hey, I'm an alpha dice bot. Thank u for registration";
     }
 
     @Help()

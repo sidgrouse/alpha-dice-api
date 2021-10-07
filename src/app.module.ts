@@ -2,10 +2,12 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DB_NAME } from './constants';
 import { InvoicesModule } from './invoice/invoices.module';
-import { Invoice } from './invoice/invoice.entity';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksService } from './task.service';
+import { Invoice } from './storage/entities/invoice.entity';
+import { User } from './storage/entities/user.entity';
+import { Pledge } from './storage/entities/pledge.entity';
 
 @Module({
   imports: [
@@ -17,7 +19,11 @@ import { TasksService } from './task.service';
       username: 'root',
       password: 'root',
       database: DB_NAME,
-      entities: [Invoice],
+      migrations: ["storage/migrations/*.js"],
+      cli: {
+        migrationsDir: "storage/migrations"
+      },
+      entities: [User, Pledge, Invoice],
       synchronize: true
     }),
     InvoicesModule,

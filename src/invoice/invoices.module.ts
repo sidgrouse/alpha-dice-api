@@ -2,15 +2,17 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { InvoiceService } from './invoice.service';
 import { InvoiceController } from './invoice.controller';
-import { Invoice } from './invoice.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { InvoiceTgController } from './invoice.telegram';
 import { AddInvoiceTgSceneController } from './add-invoice.telegram';
 import { sessionMiddleware } from 'src/common/middleware';
+import { User } from 'src/storage/entities/user.entity';
+import { Pledge } from 'src/storage/entities/pledge.entity';
+import { Invoice } from '../storage/entities/invoice.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Invoice]),
+  imports: [TypeOrmModule.forFeature([Invoice, User, Pledge]),
   ConfigModule.forRoot({envFilePath: 'development.env'}),
   TelegrafModule.forRootAsync({
     imports: [ConfigModule],

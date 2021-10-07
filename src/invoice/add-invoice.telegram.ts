@@ -48,9 +48,9 @@ import { InvoiceService } from './invoice.service';
         if(invoiceElements.length !== 2){
           throw new TelegrafException('Wrong format');
         }
-        const dto = new CreateInvoiceDto( invoiceElements[0], Number.parseInt(invoiceElements[1]));
+        const dto = new CreateInvoiceDto( invoiceElements[0], invoiceElements[1]);
         this._invoiceBuffer.push(dto);
       });
-      return this._invoiceBuffer.map(itm => `${itm.userId} (${itm.pledjeId})`).join('\n');
+      return this._invoiceBuffer.map(itm => `${itm.userName} (${itm.pledjeName})`).join('\n');
     }
   }

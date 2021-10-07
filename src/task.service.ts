@@ -4,6 +4,7 @@ import { InjectBot } from 'nestjs-telegraf'
 import { Telegraf } from 'telegraf';
 import { CRON_INVOICE_NOTIFICSTIONS as CRON_INVOICE_NOTIFICATIONS } from './constants';
 import { InvoiceService } from './invoice/invoice.service';
+import { User } from './storage/entities/user.entity';
 
 @Injectable()
 export class TasksService {
@@ -12,7 +13,12 @@ export class TasksService {
 
   @Cron(CRON_INVOICE_NOTIFICATIONS)
   async handleCron() {
-    const allInvoices = await this._invoiceService.getAllUserInvoices('k_matroskin');
-    this.bot.telegram.sendMessage(1098810534, `time to pay for ${allInvoices.map(itm => itm.pledjeId).join(',')}`);
+    const debptors = await this._invoiceService.getDebptors();
+    console.log('===cron==', debptors);
+    debptors.forEach(async user => {
+        const invoices = await this._invoiceService.getAllUserInvoices(user.telegramId);
+        this.bot.telegram.sendMessage(user.telegramId, `time to pay ${invoices.reduce((sum, inv) => sum + inv.priceToPay, 0)} for ${invoices.map(itm => itm.pledjeName).join(', ')}`);
+    });
+    
   }
 }

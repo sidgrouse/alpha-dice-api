@@ -1,4 +1,4 @@
-export class CreateInvoiceDto{
-    constructor(public userId: string, public pledjeId: number){
+export class CreateInvoiceDto{ //TODO: remove?
+    constructor(public userName: string, public pledjeName: string){
     }
 }
