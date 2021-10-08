@@ -1,14 +1,20 @@
 import { InvoicesModule } from 'src/invoice/invoices.module';
-import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Invoice } from './invoice.entity';
 
 @Entity()
 export class User{
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn()
+    id: number
+
+    @Column()
     telegramId: number;
 
     @Column({length: 50})
-    name: string;
+    telegramName: string;
+
+    @Column({length: 50, nullable: true})
+    firstName: string;
 
     @Column({length: 50, nullable: true})
     city: string;

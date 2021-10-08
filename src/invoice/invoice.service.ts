@@ -24,7 +24,7 @@ export class InvoiceService {
 
     async addUser(name: string, telegramId : number): Promise<void> { // TODO: be changed ?
         const user = new User();
-        user.name = name;
+        user.telegramName = name;
         user.telegramId = telegramId;
         const ret = await this.userRepository.save(user);
         console.log(ret);
@@ -33,18 +33,18 @@ export class InvoiceService {
     async addInvoice(dto: CreateInvoiceDto): Promise<InvoiceDto> {
         //this.userRepository.preload()
         const pledge = await this.pledgeRepository.findOneOrFail({where: { pledgeName: dto.pledjeName } });
-        let user = await this.userRepository.findOne({where: { name: dto.userName } });
+        let user = await this.userRepository.findOne({where: { telegramName: dto.userName } });
 
         if (!user){
             user = new User();
-            user.name = dto.userName;
+            user.telegramName = dto.userName;
             console.log(`There is no user named ${dto.userName} in system`);
         }
 
         const invoice = new Invoice();
         invoice.pledge = pledge;
         invoice.user = user;
-        invoice.status = InvoiceStatus.NO_INFO; //TODO: make it no_info, change after pay date
+        invoice.status = InvoiceStatus.NOTIFICATION_NEEDED; //TODO: make it no_info, change after pay date
         
         const invEntity = await this.invoiceRepository.save(invoice);
 
@@ -52,12 +52,12 @@ export class InvoiceService {
         //      (to avoid overlapses in bank logs since it has the same additional fraction number)
 
         console.log('add', invEntity);
-        return new InvoiceDto(invEntity.user.name, invEntity.pledge.pledgeName, InvoiceService.getFullPrice(invEntity), invEntity.status);
+        return new InvoiceDto(invEntity.user.telegramName, invEntity.pledge.pledgeName, InvoiceService.getFullPrice(invEntity), invEntity.status);
     }
 
     async getAllInvoices(): Promise<InvoiceDto[]> {
         return await (await this.invoiceRepository.find({relations: ["user"]}))
-        .map(inv => new InvoiceDto(inv.user.name, inv.pledge.pledgeName, InvoiceService.getFullPrice(inv), inv.status));
+        .map(inv => new InvoiceDto(inv.user.telegramName, inv.pledge.pledgeName, InvoiceService.getFullPrice(inv), inv.status));
     }
 
     async getDebptors(): Promise<UserDto[]> {
@@ -65,14 +65,14 @@ export class InvoiceService {
         return allInvoices
             .filter(inv => inv.status === InvoiceStatus.NOTIFICATION_NEEDED)
             .filter((v, i, a) => a.indexOf(v) === i) // distinct
-            .map(inv => new UserDto(inv.user.telegramId, inv.user.name));
+            .map(inv => new UserDto(inv.user.telegramId, inv.user.telegramName));
     }
     
     async getAllUserInvoices(telegramId: number): Promise<InvoiceDto[]> {
-        const user = await this.userRepository.findOne(telegramId, {relations: ["invoices"]});
+        const user = await this.userRepository.findOne({relations: ["invoices"], where: {telegramId: telegramId}});
         
         console.log('get user invs', user);
-        return user.invoices.map(inv => new InvoiceDto(user.name, inv.pledge.pledgeName, InvoiceService.getFullPrice(inv), inv.status ));
+        return user.invoices.map(inv => new InvoiceDto(user.telegramName, inv.pledge.pledgeName, InvoiceService.getFullPrice(inv), inv.status ));
     }
 
     //TODO: fractional parts

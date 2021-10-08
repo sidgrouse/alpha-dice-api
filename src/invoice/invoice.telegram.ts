@@ -4,6 +4,7 @@ import { AdminGuard } from 'src/common/guards/admin.guard';
 import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { SceneNames } from 'src/constants';
+import { InvoiceStatus } from 'src/constants/invoice-status';
 import { Context } from 'telegraf';
 import { InvoiceService } from './invoice.service';
   
@@ -15,19 +16,21 @@ import { InvoiceService } from './invoice.service';
     @Start()
     async onStart(@Ctx() ctx : Context): Promise<string> {
       this.invoiceService.addUser(ctx.from.username, ctx.from.id);
-      return "Hey, I'm an alpha dice bot. Thank u for registration";
+      return "Hey, I'm an alpha dice bot. Thank u for registration \n/invoices - to get all of your invoices";
     }
 
     @Help()
     async onHelp(): Promise<string> {
-      return 'Send me any text';
+      return '/invoices - to get all of your invoices';
     }
 
-    @Command('get_info')
+    @Command('invoices')
     async onGetInfo(@Ctx() context: Context) : Promise<string>{
-      const userName = context.from.username;
-      const ret = await this.invoiceService.getAllInvoices();
-      return JSON.stringify(ret.filter(itm => itm.userId === userName));
+      const invoices = await this.invoiceService.getAllUserInvoices(context.from.id);
+      console.log(invoices);
+      const invString = invoices.map(inv => `${inv.priceToPay.toFixed(2)} for ${inv.pledjeName} (${inv.status})`).join('\n');
+
+      return `${invString}\nPlease note that it is essential to pay the exact price without rounding! Otherwise we cannot map you with your payment`;
     }
 
 

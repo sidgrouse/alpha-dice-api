@@ -8,7 +8,11 @@ export class Invoice{
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({type: 'int'}) //TODO: do properly https://typeorm.io/#/entities/enum-column-type
+    @Column({
+        type: "enum",
+        enum: InvoiceStatus,
+        default: InvoiceStatus.NO_INFO
+    })
     status: InvoiceStatus;
     
     @ManyToOne(() => User, user => user.invoices, {cascade: true})

@@ -17,8 +17,14 @@ export class TasksService {
     console.log('===cron==', debptors);
     debptors.forEach(async user => {
         const invoices = await this._invoiceService.getAllUserInvoices(user.telegramId);
-        this.bot.telegram.sendMessage(user.telegramId, `time to pay ${invoices.reduce((sum, inv) => sum + inv.priceToPay, 0)} for ${invoices.map(itm => itm.pledjeName).join(', ')}`);
+        const userTotal = invoices.reduce((sum, inv) => sum + inv.priceToPay, 0).toFixed(2);
+        this.bot.telegram.sendMessage(user.telegramId, `time to pay ${userTotal} for ${invoices.map(itm => itm.pledjeName).join(', ')}`);
+        await this.delay(100);
     });
     
   }
+
+  private delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
+}
 }
