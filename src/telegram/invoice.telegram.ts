@@ -4,9 +4,8 @@ import { AdminGuard } from 'src/common/guards/admin.guard';
 import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { SceneNames } from 'src/constants';
-import { InvoiceStatus } from 'src/constants/invoice-status';
 import { Context } from 'telegraf';
-import { InvoiceService } from './invoice.service';
+import { InvoiceService } from '../services/invoice.service';
   
   @Update()
   @UseFilters(TelegrafExceptionFilter)
@@ -25,18 +24,23 @@ import { InvoiceService } from './invoice.service';
     }
 
     @Command('invoices')
-    async onGetInfo(@Ctx() context: Context) : Promise<string>{
-      const invoices = await this.invoiceService.getAllUserInvoices(context.from.id);
-      console.log(invoices);
-      const invString = invoices.map(inv => `${inv.priceToPay.toFixed(2)} for ${inv.pledjeName} (${inv.status})`).join('\n');
+    async getInfo(@Ctx() context: Context) : Promise<string>{
+      const debts = await this.invoiceService.getAllUserDebts(context.from.id);
+      console.log(debts);
+      const invString = debts.map(debt => `${debt.amount.toFixed(2)} for ${debt.pledjeName} (${debt.invoiceName})`).join('\n');
 
       return `${invString}\nPlease note that it is essential to pay the exact price without rounding! Otherwise we cannot map you with your payment`;
+    }
+
+    @Command('add_order')
+    async addOrder(@Ctx() context: SceneCtx){
+      context.scene.enter(SceneNames.ADD_ORDER) ;
     }
 
 
     @Command('add_invoice')
     @UseGuards(AdminGuard)
     async onAddInvoice(@Ctx() context: SceneCtx) {
-      await context.scene.enter(SceneNames.ADD_INVOICES);
+      await context.scene.enter(SceneNames.ADD_INVOICE);
     }
   }

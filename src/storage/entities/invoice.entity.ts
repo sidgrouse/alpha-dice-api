@@ -1,6 +1,8 @@
+import { type } from 'os';
 import { InvoiceStatus } from 'src/constants/invoice-status';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Pledge } from './pledge.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Payment } from './payment.entity';
+import { Pledge as Pledge } from './pledge.entity';
 import { User } from './user.entity';
 
 @Entity()
@@ -15,9 +17,15 @@ export class Invoice{
     })
     status: InvoiceStatus;
     
-    @ManyToOne(() => User, user => user.invoices, {cascade: true})
-    user: User;
+    @Column({default: 0})
+    amount: number
+
+    @Column({default: 'base'})
+    name: string
 
     @ManyToOne(() => Pledge, {cascade: true, eager: true})
     pledge: Pledge;
+
+    @OneToMany(() => Payment, pmnt =>pmnt.invoice, {cascade: true})
+    userPayments: Payment[];
 }

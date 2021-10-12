@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectBot } from 'nestjs-telegraf'
 import { Telegraf } from 'telegraf';
-import { CRON_INVOICE_NOTIFICSTIONS as CRON_INVOICE_NOTIFICATIONS } from './constants';
-import { InvoiceService } from './invoice/invoice.service';
-import { User } from './storage/entities/user.entity';
+import { CRON_INVOICE_NOTIFICSTIONS as CRON_INVOICE_NOTIFICATIONS } from '../constants';
+import { InvoiceService } from './invoice.service';
+import { User } from '../storage/entities/user.entity';
 
 @Injectable()
 export class TasksService {
@@ -16,9 +16,9 @@ export class TasksService {
     const debptors = await this._invoiceService.getDebptors();
     console.log('===cron==', debptors);
     debptors.forEach(async user => {
-        const invoices = await this._invoiceService.getAllUserInvoices(user.telegramId);
-        const userTotal = invoices.reduce((sum, inv) => sum + inv.priceToPay, 0).toFixed(2);
-        this.bot.telegram.sendMessage(user.telegramId, `time to pay ${userTotal} for ${invoices.map(itm => itm.pledjeName).join(', ')}`);
+        const debts = await this._invoiceService.getAllUserDebts(user.telegramId);
+        const userTotal = debts.reduce((sum, inv) => sum + inv.amount, 0).toFixed(2);
+        this.bot.telegram.sendMessage(user.telegramId, `time to pay ${userTotal} for ${debts.map(itm => itm.pledjeName).join(', ')}`);
         await this.delay(100);
     });
     

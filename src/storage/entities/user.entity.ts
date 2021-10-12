@@ -1,17 +1,22 @@
-import { InvoicesModule } from 'src/invoice/invoices.module';
-import { Entity, Column, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Invoice } from './invoice.entity';
+import { InvoicesModule } from 'src/services/services.module';
+import { Entity, Column, OneToMany, PrimaryGeneratedColumn, Index } from 'typeorm';
+import { Order } from './order.entity';
 
 @Entity()
 export class User{
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column()
+    @Index("IDX_user_telegramId")
+    @Column({unique: true})
     telegramId: number;
 
-    @Column({length: 50})
+    @Index("IDX_user_telegramName")
+    @Column({length: 50, unique: true})
     telegramName: string;
+
+    @Column({nullable: true}) //unique in the future
+    fractionalAddition: number;
 
     @Column({length: 50, nullable: true})
     firstName: string;
@@ -22,6 +27,6 @@ export class User{
     @Column({length: 500, nullable: true})
     fullPostalAddress: string;
 
-    @OneToMany(type => Invoice, inv => inv.user)
-    invoices: Invoice[]
+    @OneToMany(type => Order, inv => inv.user)
+    orders: Order[]
 }
