@@ -28,17 +28,6 @@ export class InvoiceService {
         private paymentRepository: Repository<Payment>
       ) {}
 
-    async addUser(name: string, telegramId : number): Promise<void> {
-        const existedUser = this.userRepository.findOne({where: {telegramId: telegramId}})
-
-        if(!existedUser){
-            const user = new User();
-            user.telegramName = name;
-            user.telegramId = telegramId;
-            await this.userRepository.save(user);
-        }
-    } // userservice
-
     async addOrder(pledgeName: string, userTelegramId : number, count = 1): Promise<void> {
         const user = await this.getUserByTgId(userTelegramId);
 
@@ -82,29 +71,19 @@ export class InvoiceService {
         //TODO: check orders added after getting but before saving here
         console.log('add-inv', invEntity);
     }
-/*
-    async getAllDebts(): Promise<InvoiceDto[]> {
-        return await (await this.invoiceRepository.find({relations: ["user"]}))
-        .map(inv => new InvoiceDto(inv..telegramName, inv.pledge.pledgeName, InvoiceService.getFullPrice(inv), inv.status));
-    }
-*/
+
     async getDebptors(): Promise<UserDto[]> {
-        /*
-        const allInvoices = await await this.orderRepository.find({relations: ["user"]})
-        return allInvoices
-            .filter(inv => inv.status === InvoiceStatus.TO_PAY)
-            .filter((v, i, a) => a.indexOf(v) === i) // distinct
-            .map(inv => new UserDto(inv.user.telegramId, inv.user.telegramName));
-        */
-       const userEntity = await this.userRepository.findOne({where: {telegramName: "k_matroskin"}});
-       return [new UserDto(userEntity.telegramId, userEntity.telegramName)]; //TODO: remake mockup
+        const users = await this.userRepository.find({relations: ["orders", "orders.payments", "orders.payments.invoice"]})
+        return users.filter(usr => usr.orders.flatMap(ord => ord.payments)
+            .filter(p => p.status === PaymentStatus.NO_INFO && p.invoice.status === InvoiceStatus.TO_PAY))
+            .map(usr => new UserDto(usr.telegramId, usr.telegramName));
     }
     
     async getAllUserDebts(telegramId: number): Promise<DebtDto[]> {
         const user = await this.userRepository.findOneOrFail({
                 relations: ["orders", "orders.payments", "orders.payments.order", "orders.payments.order.pledge", "orders.payments.invoice", "orders.payments.invoice.pledge"],
                 where: {telegramId: telegramId}
-            }); //TODO: rempve "orders.payments.order" etc. Preload or something
+            }); //TODO: remove "orders.payments.order" etc. Preload or something
         
         const paymentsToPay = user.orders
             .flatMap(order => order.payments)

@@ -4,7 +4,6 @@ import { InjectBot } from 'nestjs-telegraf'
 import { Telegraf } from 'telegraf';
 import { CRON_INVOICE_NOTIFICSTIONS as CRON_INVOICE_NOTIFICATIONS } from '../constants';
 import { InvoiceService } from './invoice.service';
-import { User } from '../storage/entities/user.entity';
 
 @Injectable()
 export class TasksService {
@@ -26,5 +25,5 @@ export class TasksService {
 
   private delay(ms: number) {
     return new Promise( resolve => setTimeout(resolve, ms) );
-}
+  }
 }

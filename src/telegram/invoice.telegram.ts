@@ -4,17 +4,19 @@ import { AdminGuard } from 'src/common/guards/admin.guard';
 import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { SceneNames } from 'src/constants';
+import { UserService } from 'src/services/user.service';
 import { Context } from 'telegraf';
 import { InvoiceService } from '../services/invoice.service';
   
   @Update()
   @UseFilters(TelegrafExceptionFilter)
   export class InvoiceTgController {
-    constructor(private readonly invoiceService: InvoiceService){}
+    constructor(private readonly invoiceService: InvoiceService,
+      private readonly userService: UserService){}
 
     @Start()
     async onStart(@Ctx() ctx : Context): Promise<string> {
-      this.invoiceService.addUser(ctx.from.username, ctx.from.id);
+      this.userService.addUser(ctx.from.username, ctx.from.id);
       return "Hey, I'm an alpha dice bot. Thank u for registration \n/invoices - to get all of your invoices";
     }
 

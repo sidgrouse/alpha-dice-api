@@ -17,6 +17,7 @@ import { Payment } from 'src/storage/entities/payment.entity';
 import { getEnvironmentData } from 'worker_threads';
 import { AddInvoiceTgSceneController } from 'src/telegram/add-invoice.telegram';
 import { AddOrderTgSceneController } from 'src/telegram/add-order.telegram';
+import { UserService } from './user.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Pledge, Order, Invoice, Project, Payment]),
@@ -29,9 +30,9 @@ import { AddOrderTgSceneController } from 'src/telegram/add-order.telegram';
       }),
       inject: [ConfigService]
   })],
-  providers: [InvoiceService, InvoiceTgController, AddInvoiceTgSceneController, AddOrderTgSceneController],
+  providers: [InvoiceService, UserService, InvoiceTgController, AddInvoiceTgSceneController, AddOrderTgSceneController],
   controllers: [InvoiceController],
-  exports: [InvoiceService]
+  exports: [InvoiceService, UserService]
 })
 @Module({})
-export class InvoicesModule {}
+export class ServiceModule {}
