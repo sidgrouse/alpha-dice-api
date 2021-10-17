@@ -9,7 +9,6 @@ import { Pledge } from './entities/pledge.entity';
 import { Invoice } from './entities/invoice.entity';
 import { Project } from './entities/project.entity';
 import { Payment } from './entities/payment.entity';
-import { TempIdentifier } from './entities/temp-identifier.entity';
 import { DB_NAME } from 'src/constants';
 
 @Module({imports: [

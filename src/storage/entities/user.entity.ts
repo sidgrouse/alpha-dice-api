@@ -1,7 +1,6 @@
 import { ServiceModule } from 'src/services/services.module';
 import { Entity, Column, OneToMany, PrimaryGeneratedColumn, Index, OneToOne } from 'typeorm';
 import { Order } from './order.entity';
-import { TempIdentifier } from './temp-identifier.entity';
 
 @Entity()
 export class User{
@@ -25,8 +24,8 @@ export class User{
     @Column({length: 500, nullable: true})
     fullPostalAddress: string;
 
-    @OneToOne(_ => TempIdentifier, id => id.user, {nullable: true})
-    fractionalAddition: TempIdentifier;
+    @Column({nullable: true, unique: true, })
+    utid: number;
 
     @OneToMany(_ => Order, inv => inv.user)
     orders: Order[]
