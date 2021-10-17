@@ -1,4 +1,4 @@
 export class InvoiceDto{
-    constructor(public pledjeName: string, public invoiceName: string, public amount: number){
+    constructor(public invoiceId: number, public pledjeName: string, public invoiceName: string, public amount: number){
     }
 }

@@ -1,10 +1,12 @@
-import { UseGuards } from '@nestjs/common';
+import { UseFilters, UseGuards } from '@nestjs/common';
 import {Ctx, Help, Command, Message, Scene, SceneEnter, On, TelegrafException, } from 'nestjs-telegraf';
 import { SceneCtx } from 'src/common/scene-context.interface';
+import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { SceneNames } from 'src/constants';
-import { InvoiceDto } from 'src/dto/invoice.dto';
 import { InvoiceService } from 'src/services/invoice.service';
   
+
+  @UseFilters(TelegrafExceptionFilter)
   @Scene(SceneNames.ADD_INVOICE)
   export class AddInvoiceTgSceneController {
     constructor(private _invoiceService: InvoiceService){

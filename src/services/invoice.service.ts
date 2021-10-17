@@ -24,7 +24,9 @@ export class InvoiceService {
         @InjectRepository(Order)
         private orderRepository: Repository<Order>,
         @InjectRepository(Invoice)
-        private invoiceRepository: Repository<Invoice>
+        private invoiceRepository: Repository<Invoice>,
+        @InjectRepository(Payment)
+        private paymentRepository: Repository<Payment>
       ) {}
 
     async addOrder(pledgeName: string, userTelegramId : number, count = 1): Promise<void> {
@@ -74,7 +76,8 @@ export class InvoiceService {
         console.log('add-inv', invEntity);
     }
 
-    async declarePayment(telegramId: number) : Promise<InvoiceDto[]>{ //TODO: remake, add splitting
+    async declarePayment(telegramId: number, invoiceIds: number[]) : Promise<InvoiceDto[]>{ //TODO: remake, add splitting
+        console.log('invIds', invoiceIds);
         const user = await this.userRepository.findOneOrFail({
             relations: ["orders", "orders.payments", "orders.payments.order", "orders.payments.order.pledge", "orders.payments.invoice", "orders.payments.invoice.pledge"],
             where: {telegramId: telegramId}
@@ -82,12 +85,21 @@ export class InvoiceService {
     
         const declaredPayments = user.orders
             .flatMap(order => order.payments)
-            .filter(p => p.status === PaymentStatus.NO_INFO && p.invoice.status === InvoiceStatus.TO_PAY);
-        declaredPayments.map(p => p.status = PaymentStatus.PAYMENT_DECLARED);
-        this.userRepository.save(user);
+            .filter(
+                p => p.status === PaymentStatus.NO_INFO 
+                && p.invoice.status === InvoiceStatus.TO_PAY
+                && invoiceIds.some(declaredInvId => p.invoice.id === declaredInvId));
+        if(declaredPayments.length !== invoiceIds.length){
+            console.error(`Some declared payments are not found as payable. Declared ids=${invoiceIds}.`+
+            ` Payments=${declaredPayments.map(p => p.id).join(', ')}`);
+        }
+               
+        declaredPayments.forEach(p => p.status = PaymentStatus.PAYMENT_DECLARED);
+        console.log('declarePmnts', declaredPayments);
+        await this.paymentRepository.save(declaredPayments);
 
-        this.checkReleaseUtId(user.telegramId);
-        return declaredPayments.map(pmnt => new InvoiceDto(pmnt.order.pledge.name, pmnt.invoice.name , pmnt.invoice.amount));
+        return declaredPayments.map(pmnt => 
+            new InvoiceDto(pmnt.invoice.id, pmnt.order.pledge.name, pmnt.invoice.name , pmnt.invoice.amount));
     }
 
     async getDebptors(): Promise<UserDto[]> {
@@ -105,8 +117,9 @@ export class InvoiceService {
         const invoicesToPay = user.orders
             .flatMap(order => order.payments)
             .filter(p => p.status === PaymentStatus.NO_INFO && p.invoice.status === InvoiceStatus.TO_PAY)
-            .map(pmnt => new InvoiceDto(pmnt.order.pledge.name, pmnt.invoice.name , pmnt.invoice.amount));
+            .map(pmnt => new InvoiceDto(pmnt.invoice.id, pmnt.order.pledge.name, pmnt.invoice.name , pmnt.invoice.amount));
 
+        this.checkAssignNewUtid(user);
         console.log('invSrv.get_user', user);
         return new DebtDto(invoicesToPay, this.getIdentificationalAmount(user));
     }
@@ -124,7 +137,6 @@ export class InvoiceService {
             .filter(usr => usr.utid)
             .map(usr =>usr.utid)
             .sort();
-        console.log('===1', assignedUtids);
         for (let attemptNumber = 0; attemptNumber < 3; attemptNumber++) {
             try{
                 for (let i = 0; i < 1000; i++) {

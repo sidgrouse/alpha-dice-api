@@ -14,6 +14,7 @@ export class TasksService {
   async handleCron() {
     const debptors = await this._invoiceService.getDebptors();
     console.log('===cron==', debptors);
+    return;
     debptors.forEach(async user => {
         const debt = await this._invoiceService.getAllUserDebts(user.telegramId);
         const userTotal = debt.invoices.reduce((sum, inv) => sum + inv.amount, debt.identificationalAmount).toFixed(2); //helper?
@@ -22,7 +23,8 @@ export class TasksService {
           .join('\n'); //TODO: helper?
         this.bot.telegram.sendMessage(user.telegramId, 
           `Активные платежи за игры\nИтого:${userTotal}\nДетали:${debtDetails}\n` +
-          `Не забудьте добавить ${debt.identificationalAmount.toFixed(2)} к каждому переводу для идентификации его как вашего`);
+          `Не забудьте добавить ${debt.identificationalAmount.toFixed(2)} к каждому переводу для идентификации его как вашего\n` +
+          `/declare_payment для подтверждения платежей`);
         await this.delay(100);
     });
     

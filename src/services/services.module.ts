@@ -18,6 +18,7 @@ import { getEnvironmentData } from 'worker_threads';
 import { AddInvoiceTgSceneController } from 'src/telegram/add-invoice.telegram';
 import { AddOrderTgSceneController } from 'src/telegram/add-order.telegram';
 import { UserService } from './user.service';
+import { DeclarePaymentTgSceneController } from 'src/telegram/declare-payment.telegram';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Pledge, Order, Invoice, Project, Payment]),
@@ -30,7 +31,7 @@ import { UserService } from './user.service';
       }),
       inject: [ConfigService]
   })],
-  providers: [InvoiceService, UserService, InvoiceTgController, AddInvoiceTgSceneController, AddOrderTgSceneController],
+  providers: [InvoiceService, UserService, InvoiceTgController, AddInvoiceTgSceneController, AddOrderTgSceneController, DeclarePaymentTgSceneController],
   controllers: [InvoiceController],
   exports: [InvoiceService, UserService]
 })

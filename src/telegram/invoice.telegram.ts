@@ -23,7 +23,8 @@ import { InvoiceService } from '../services/invoice.service';
 
     @Help()
     async onHelp(): Promise<string> {
-      return '/invoices - to get all of your invoices';
+      return "При оплате не забывайте добавлять указанное число копеек (до 10руб) к каждому вашему платежу. " + 
+      "Для просмотра списка доступных команд, начните вводить /"
     }
 
     @Command('invoices')
