@@ -15,9 +15,14 @@ export class TasksService {
     const debptors = await this._invoiceService.getDebptors();
     console.log('===cron==', debptors);
     debptors.forEach(async user => {
-        const debts = await this._invoiceService.getAllUserDebts(user.telegramId);
-        const userTotal = debts.reduce((sum, inv) => sum + inv.amount, 0).toFixed(2);
-        this.bot.telegram.sendMessage(user.telegramId, `time to pay ${userTotal} for ${debts.map(itm => itm.pledjeName).join(', ')}`);
+        const debt = await this._invoiceService.getAllUserDebts(user.telegramId);
+        const userTotal = debt.invoices.reduce((sum, inv) => sum + inv.amount, debt.identificationalAmount).toFixed(2); //helper?
+        const debtDetails = debt.invoices.map(itm => 
+          `${itm.pledjeName}${itm.invoiceName ? '('+itm.invoiceName+') ' : ' '} ${itm.amount + debt.identificationalAmount}руб`)
+          .join('\n'); //TODO: helper?
+        this.bot.telegram.sendMessage(user.telegramId, 
+          `Активные платежи за игры\nИтого:${userTotal}\nДетали:${debtDetails}\n` +
+          `Не забудьте добавить ${debt.identificationalAmount.toFixed(2)} к каждому переводу для идентификации его как вашего`);
         await this.delay(100);
     });
     

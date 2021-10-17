@@ -6,6 +6,7 @@ import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { SceneNames } from 'src/constants';
 import { UserService } from 'src/services/user.service';
 import { Context } from 'telegraf';
+import { SceneContext } from 'telegraf/typings/scenes';
 import { InvoiceService } from '../services/invoice.service';
   
   @Update()
@@ -16,7 +17,7 @@ import { InvoiceService } from '../services/invoice.service';
 
     @Start()
     async onStart(@Ctx() ctx : Context): Promise<string> {
-      this.userService.addUser(ctx.from.username, ctx.from.id);
+      await this.userService.addUser(ctx.from.username, ctx.from.id);
       return "Hey, I'm an alpha dice bot. Thank u for registration \n/invoices - to get all of your invoices";
     }
 
@@ -27,22 +28,26 @@ import { InvoiceService } from '../services/invoice.service';
 
     @Command('invoices')
     async getInfo(@Ctx() context: Context) : Promise<string>{
-      const debts = await this.invoiceService.getAllUserDebts(context.from.id);
-      console.log(debts);
-      const invString = debts.map(debt => `${debt.amount.toFixed(2)} for ${debt.pledjeName} (${debt.invoiceName})`).join('\n');
+      const debt = await this.invoiceService.getAllUserDebts(context.from.id);
+      console.log(debt);
+      const invString = debt.invoices.map(debt => `${debt.amount.toFixed(2)} for ${debt.pledjeName} (${debt.invoiceName})`).join('\n');
 
       return `${invString}\nPlease note that it is essential to pay the exact price without rounding! Otherwise we cannot map you with your payment`;
     }
 
     @Command('add_order')
     async addOrder(@Ctx() context: SceneCtx){
-      context.scene.enter(SceneNames.ADD_ORDER) ;
+      context.scene.enter(SceneNames.ADD_ORDER);
     }
-
 
     @Command('add_invoice')
     @UseGuards(AdminGuard)
     async onAddInvoice(@Ctx() context: SceneCtx) {
       await context.scene.enter(SceneNames.ADD_INVOICE);
+    }
+
+    @Command('declare_payment')
+    async onDeclarePayment(@Ctx() context: SceneContext){
+      await context.scene.enter(SceneNames.DECLARE_PAYMENT);
     }
   }

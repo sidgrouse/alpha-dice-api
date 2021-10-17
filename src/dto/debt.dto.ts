@@ -1,4 +1,6 @@
+import { InvoiceDto } from "./invoice.dto";
+
 export class DebtDto{
-    constructor(public pledjeName: string, public invoiceName: string, public amount: number){
+    constructor(public invoices: InvoiceDto[], public identificationalAmount: number){
     }
 }

@@ -23,7 +23,7 @@ import { DB_NAME } from 'src/constants';
         cli: {
           migrationsDir: "migrations"
         },
-        entities: [User, Pledge, Order, Invoice, Project, Payment, TempIdentifier],
+        entities: [User, Pledge, Order, Invoice, Project, Payment],
         synchronize: true
       }),
     ]})
