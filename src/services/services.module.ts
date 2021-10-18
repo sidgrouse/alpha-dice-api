@@ -1,27 +1,30 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { InvoiceService } from './invoice.service';
 import { InvoiceController } from '../controllers/invoice.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { sessionMiddleware } from 'src/common/middleware';
+import { getEnvironmentData } from 'worker_threads';
 
-import { InvoiceTgController } from '../telegram/invoice.telegram';
+import { MainTgController as MainTgScene } from '../telegram/main.telegram';
+import { AddInvoiceTgSceneController as AddInvoiceTgScene } from 'src/telegram/add-invoice.telegram';
+import { AddOrderTgSceneController as AddOrderTgScene } from 'src/telegram/add-order.telegram';
 
 import { User } from 'src/storage/entities/user.entity';
-import { Pledge } from 'src/storage/entities/pledge.entity';
+import { Item } from 'src/storage/entities/item.entity';
 import { Order } from '../storage/entities/order.entity';
 import { Invoice } from 'src/storage/entities/invoice.entity';
 import { Project } from 'src/storage/entities/project.entity';
-import { Payment } from 'src/storage/entities/payment.entity';
-import { getEnvironmentData } from 'worker_threads';
-import { AddInvoiceTgSceneController } from 'src/telegram/add-invoice.telegram';
-import { AddOrderTgSceneController } from 'src/telegram/add-order.telegram';
+import { Debt } from 'src/storage/entities/payment.entity';
+
+import { InvoiceService } from './invoice.service';
 import { UserService } from './user.service';
-import { DeclarePaymentTgSceneController } from 'src/telegram/declare-payment.telegram';
+import { DeclarePaymentTgScene } from 'src/telegram/declare-payment.telegram';
+import { AddProjectTgSceneController as AddProjectTgScene } from 'src/telegram/add-project.telegram';
+import { ProjectService } from './project.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Pledge, Order, Invoice, Project, Payment]),
+  imports: [TypeOrmModule.forFeature([User, Item, Order, Invoice, Project, Debt]),
   ConfigModule.forRoot({envFilePath: 'development.env'}),
   TelegrafModule.forRootAsync({
     imports: [ConfigModule],
@@ -31,9 +34,9 @@ import { DeclarePaymentTgSceneController } from 'src/telegram/declare-payment.te
       }),
       inject: [ConfigService]
   })],
-  providers: [InvoiceService, UserService, InvoiceTgController, AddInvoiceTgSceneController, AddOrderTgSceneController, DeclarePaymentTgSceneController],
+  providers: [InvoiceService, UserService, ProjectService, MainTgScene, AddInvoiceTgScene, AddOrderTgScene, DeclarePaymentTgScene, AddProjectTgScene],
   controllers: [InvoiceController],
-  exports: [InvoiceService, UserService]
+  exports: [InvoiceService, UserService, ProjectService]
 })
 @Module({})
 export class ServiceModule {}

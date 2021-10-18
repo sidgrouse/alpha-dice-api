@@ -6,11 +6,10 @@ import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { SceneNames } from 'src/constants';
 import { InvoiceService } from 'src/services/invoice.service';
 import { Context, Telegraf } from 'telegraf';
-import { getFromContainer } from 'typeorm';
   
   @Scene(SceneNames.DECLARE_PAYMENT)
   @UseFilters(TelegrafExceptionFilter)
-  export class DeclarePaymentTgSceneController {
+  export class DeclarePaymentTgScene {
     private _declaredInvoiceIds: number[];
     private _people: string[];
     
@@ -21,27 +20,33 @@ import { getFromContainer } from 'typeorm';
     }
 
   @SceneEnter()
-  async onSceneEnter(@Ctx() context: Context): Promise<void> {
+  async onSceneEnter(@Ctx() context: SceneCtx): Promise<void> {
     const debt = await this._invoiceService.getAllUserDebts(context.from.id);
-    const userTotal = debt.invoices.reduce((sum, inv) => sum + inv.amount, debt.identificationalAmount).toFixed(2); //helper?
-
-    const inlineKeyboardOrders = debt.invoices.map(inv => 
-      [{
-          text: `${inv.pledjeName} ${inv.invoiceName}(${inv.amount + debt.identificationalAmount})`,
-          callback_data: `inv_${context.from.username}_${inv.invoiceId}`
-      }]
-    );
-    await this._bot.telegram.sendMessage(context.from.id,
-      "Выберите инвойсы для подтверждения оплаты",
-      {
-        reply_markup: {
-          inline_keyboard: inlineKeyboardOrders
-        }
-      });
-    debt.invoices.map(inv => this._bot.action(`inv_${context.from.username}_${inv.invoiceId}`, async itm => {
-      this._declaredInvoiceIds.push(inv.invoiceId); //check if exist
-      await this._bot.telegram.sendMessage(context.from.id, `${inv.pledjeName} добавлен в список. /confirm - подтвердить`);
-    }));
+    
+    if(debt.invoices.length > 0){
+      const userTotal = debt.invoices.reduce((sum, inv) => sum + inv.amount, debt.identificationalAmount).toFixed(2); //helper?
+      const inlineKeyboardOrders = debt.invoices.map(inv => 
+        [{
+            text: inv.toString(debt.identificationalAmount),
+            callback_data: `inv_${context.from.username}_${inv.invoiceId}`
+        }]
+      );
+      await this._bot.telegram.sendMessage(context.from.id,
+        "Выберите инвойсы для подтверждения оплаты",
+        {
+          reply_markup: {
+            inline_keyboard: inlineKeyboardOrders
+          }
+        });
+      debt.invoices.map(inv => this._bot.action(`inv_${context.from.username}_${inv.invoiceId}`, async itm => {
+        this._declaredInvoiceIds.push(inv.invoiceId); //check if exist
+        await this._bot.telegram.sendMessage(context.from.id, `${inv.pledjeName} добавлен в список. /confirm - подтвердить`);
+      }));
+    }
+    else{
+      await this._bot.telegram.sendMessage(context.from.id, "У вас нет инвойсов, ожидающих оплаты");
+      context.scene.leave();
+    }
   }
 
     @Help()
@@ -49,15 +54,15 @@ import { getFromContainer } from 'typeorm';
       const debt = await this._invoiceService.getAllUserDebts(context.from.id);
       const userTotal = debt.invoices.reduce((sum, inv) => sum + inv.amount, debt.identificationalAmount).toFixed(2); //helper?
       return this._people.join(',');
-      //return `Активный долг - ${userTotal}руб\n/cancel - back to the main menu`;
+      //return `Активный долг - ${userTotal}руб\n/cancel - назад в главное меню`;
     }
 
     @Command('confirm')
     async onConfirm(@Ctx() context: SceneCtx) {
-      const debt = await this._invoiceService.getAllUserDebts(context.from.id);
-      await this._invoiceService.declarePayment(context.from.id, this._declaredInvoiceIds);
+      const declared = await this._invoiceService.declarePayment(context.from.id, this._declaredInvoiceIds);
       await context.scene.leave();
-      return ''
+      const invoices = declared.map(itm => itm.toString()).join('\n -');
+      return `Отмечены оплаченными:\n\n -${invoices}`;
     }
 
     @Command('cancel')

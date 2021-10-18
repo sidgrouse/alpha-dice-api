@@ -7,10 +7,10 @@ import { UserDto } from 'src/dto/user.dto';
 import { InvoiceStatus } from 'src/constants/invoice-status';
 
 import { User } from 'src/storage/entities/user.entity';
-import { Pledge } from 'src/storage/entities/pledge.entity';
+import { Item } from 'src/storage/entities/item.entity';
 import { Order } from '../storage/entities/order.entity';
 import { Invoice } from 'src/storage/entities/invoice.entity';
-import { Payment } from 'src/storage/entities/payment.entity';
+import { Debt } from 'src/storage/entities/payment.entity';
 import { PaymentStatus } from 'src/constants/payment-status';
 import { InvoiceDto } from 'src/dto/invoice.dto';
 
@@ -19,36 +19,36 @@ export class InvoiceService {
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
-        @InjectRepository(Pledge)
-        private pledgeRepository: Repository<Pledge>,
+        @InjectRepository(Item)
+        private pledgeRepository: Repository<Item>,
         @InjectRepository(Order)
         private orderRepository: Repository<Order>,
         @InjectRepository(Invoice)
         private invoiceRepository: Repository<Invoice>,
-        @InjectRepository(Payment)
-        private paymentRepository: Repository<Payment>
+        @InjectRepository(Debt)
+        private paymentRepository: Repository<Debt>
       ) {}
 
     async addOrder(pledgeName: string, userTelegramId : number, count = 1): Promise<void> {
         const user = await this.getUserByTgId(userTelegramId);
 
-        const pledge = await this.pledgeRepository.findOneOrFail({where: { name: pledgeName }, relations: ["invoices", "invoices.userPayments"] })
-            || await this.pledgeRepository.findOne({where: { shortName: pledgeName }, relations: ["invoices", "invoices.userPayments"] });
+        const pledge = await this.pledgeRepository.findOneOrFail({where: { name: pledgeName }, relations: ["invoices", "invoices.userDebts"] })
+            || await this.pledgeRepository.findOne({where: { shortName: pledgeName }, relations: ["invoices", "invoices.userDebts"] });
 
         let order = new Order();
-        order.payments = pledge.invoices.map(inv => {
-             const payment = new Payment();
+        order.debts = pledge.invoices.map(inv => {
+             const payment = new Debt();
              payment.invoice = inv;
              payment.order = order;
              payment.status = PaymentStatus.NO_INFO;
              return payment;
             });
-        order.pledge = pledge;
+        order.item = pledge;
         order.user = user;
         order.count = count;
         this.orderRepository.save(order);
         
-        console.log('add-inv', order.payments);
+        console.log('add-inv', order.debts);
         this.checkAssignNewUtid(user);
         //TODO: check invoices added after getting but before saving here
     } //pledgeservice
@@ -58,8 +58,8 @@ export class InvoiceService {
         || await this.pledgeRepository.findOne({where: { shortName: pledgeName }, relations: ["orders", "order.user"] });
 
         const invoice = new Invoice();
-        invoice.userPayments = pledge.orders.map(order => {
-            const payment = new Payment();
+        invoice.userDebts = pledge.orders.map(order => {
+            const payment = new Debt();
             payment.order = order;
             payment.invoice = invoice;
             payment.status = PaymentStatus.NO_INFO;
@@ -79,12 +79,12 @@ export class InvoiceService {
     async declarePayment(telegramId: number, invoiceIds: number[]) : Promise<InvoiceDto[]>{ //TODO: remake, add splitting
         console.log('invIds', invoiceIds);
         const user = await this.userRepository.findOneOrFail({
-            relations: ["orders", "orders.payments", "orders.payments.order", "orders.payments.order.pledge", "orders.payments.invoice", "orders.payments.invoice.pledge"],
+            relations: ["orders", "orders.debts", "orders.debts.order", "orders.debts.orders.item", "orders.debts.invoice", "orders.debts.invoice.pledge"],
             where: {telegramId: telegramId}
         });
     
         const declaredPayments = user.orders
-            .flatMap(order => order.payments)
+            .flatMap(order => order.debts)
             .filter(
                 p => p.status === PaymentStatus.NO_INFO 
                 && p.invoice.status === InvoiceStatus.TO_PAY
@@ -99,25 +99,25 @@ export class InvoiceService {
         await this.paymentRepository.save(declaredPayments);
 
         return declaredPayments.map(pmnt => 
-            new InvoiceDto(pmnt.invoice.id, pmnt.order.pledge.name, pmnt.invoice.name , pmnt.invoice.amount));
+            new InvoiceDto(pmnt.invoice.id, pmnt.order.item.name, pmnt.invoice.name , pmnt.invoice.amount));
     }
 
     async getDebptors(): Promise<UserDto[]> {
-        const users = await this.userRepository.find({relations: ["orders", "orders.payments", "orders.payments.invoice"]})
+        const users = await this.userRepository.find({relations: ["orders", "orders.debts", "orders.debts.invoice"]})
         return users.filter(usr => this.isDebtor(usr))
             .map(usr => new UserDto(usr.telegramId, usr.telegramName));
     }
     
     async getAllUserDebts(telegramId: number): Promise<DebtDto> {
         const user = await this.userRepository.findOneOrFail({
-                relations: ["orders", "orders.payments", "orders.payments.order", "orders.payments.order.pledge", "orders.payments.invoice", "orders.payments.invoice.pledge"],
+                relations: ["orders", "orders.debts", "orders.debts.order", "orders.debts.orders.item", "orders.debts.invoice", "orders.debts.invoice.pledge"],
                 where: {telegramId: telegramId}
-            }); //TODO: remove "orders.payments.order" etc. Preload or something
+            }); //TODO: remove "orders.debts.order" etc. Preload or something
         
         const invoicesToPay = user.orders
-            .flatMap(order => order.payments)
+            .flatMap(order => order.debts)
             .filter(p => p.status === PaymentStatus.NO_INFO && p.invoice.status === InvoiceStatus.TO_PAY)
-            .map(pmnt => new InvoiceDto(pmnt.invoice.id, pmnt.order.pledge.name, pmnt.invoice.name , pmnt.invoice.amount));
+            .map(pmnt => new InvoiceDto(pmnt.invoice.id, pmnt.order.item.name, pmnt.invoice.name , pmnt.invoice.amount));
 
         this.checkAssignNewUtid(user);
         console.log('invSrv.get_user', user);
@@ -155,7 +155,7 @@ export class InvoiceService {
     }
 
     private async checkReleaseUtId(telegramId: number) : Promise<boolean> {
-        const user = await this.userRepository.findOneOrFail({relations: ["orders", "orders.payments", "orders.payments.invoice"]})
+        const user = await this.userRepository.findOneOrFail({relations: ["orders", "orders.debts", "orders.debts.invoice"]})
         if(!user.utid){
             console.error("Cannot release an utid, it is already released"); 
         }
@@ -171,7 +171,7 @@ export class InvoiceService {
     }
 
     private isDebtor(user: User) : boolean {
-        return user.orders.flatMap(ord => ord.payments)
+        return user.orders.flatMap(ord => ord.debts)
             .some(p => p.status === PaymentStatus.NO_INFO && p.invoice.status === InvoiceStatus.TO_PAY)
     }
 

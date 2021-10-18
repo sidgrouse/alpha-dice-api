@@ -14,12 +14,12 @@ import { InvoiceService } from 'src/services/invoice.service';
 
   @SceneEnter()
   onSceneEnter(): string {
-    return "Send me invoices in format pledgename:amount:description \n/cancel - back to the main menu";
+    return "Send me invoices in format pledgename:amount:description \n/cancel - назад в главное меню";
   }
 
     @Help()
     async onHelp(): Promise<string> {
-      return 'Send me invoices in format pledgename:amount:description \n/cancel - back to the main menu';
+      return 'Send me invoices in format pledgename:amount:description \n/cancel - назад в главное меню';
     }
 
     @Command('cancel')

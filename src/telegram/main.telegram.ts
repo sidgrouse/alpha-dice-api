@@ -11,27 +11,27 @@ import { InvoiceService } from '../services/invoice.service';
   
   @Update()
   @UseFilters(TelegrafExceptionFilter)
-  export class InvoiceTgController {
+  export class MainTgController {
     constructor(private readonly invoiceService: InvoiceService,
       private readonly userService: UserService){}
 
     @Start()
     async onStart(@Ctx() ctx : Context): Promise<string> {
       await this.userService.addUser(ctx.from.username, ctx.from.id);
-      return "Hey, I'm an alpha dice bot. Thank u for registration \n/invoices - to get all of your invoices";
+      return "Привет! Вы добавлены, начните вводить / чтоб увидеть список комманд";
     }
 
     @Help()
     async onHelp(): Promise<string> {
-      return "При оплате не забывайте добавлять указанное число копеек (до 10руб) к каждому вашему платежу. " + 
-      "Для просмотра списка доступных команд, начните вводить /"
+      return "При оплате не забывайте добавлять указанное число копеек (до 9.99руб) к каждому вашему платежу. " + 
+      "Для просмотра списка доступных команд, начните вводить /";
     }
 
     @Command('invoices')
     async getInfo(@Ctx() context: Context) : Promise<string>{
       const debt = await this.invoiceService.getAllUserDebts(context.from.id);
       console.log(debt);
-      const invString = debt.invoices.map(debt => `${debt.amount.toFixed(2)} for ${debt.pledjeName} (${debt.invoiceName})`).join('\n');
+      const invString = debt.invoices.map(inv => inv.toString(debt.identificationalAmount)).join('\n');
 
       return `${invString}\nPlease note that it is essential to pay the exact price without rounding! Otherwise we cannot map you with your payment`;
     }
@@ -39,6 +39,19 @@ import { InvoiceService } from '../services/invoice.service';
     @Command('add_order')
     async addOrder(@Ctx() context: SceneCtx){
       context.scene.enter(SceneNames.ADD_ORDER);
+    }
+
+    @Command('admin')
+    @UseGuards(AdminGuard)
+    async onAdminHelp(@Ctx() context: Context) : Promise<string>{
+      return '/add_invoice - выставить инвойс за существующий проект (будет доделано)'+
+      ///'/pay - -----'+
+      '';
+    }
+
+    @Command('add_project')
+    async addProject(@Ctx() context: SceneCtx){
+      context.scene.enter(SceneNames.ADD_PROJECT);
     }
 
     @Command('add_invoice')

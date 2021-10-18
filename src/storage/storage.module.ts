@@ -5,10 +5,10 @@ import { ScheduleModule } from '@nestjs/schedule';
 
 import { Order } from './entities/order.entity';
 import { User } from './entities/user.entity';
-import { Pledge } from './entities/pledge.entity';
+import { Item } from './entities/item.entity';
 import { Invoice } from './entities/invoice.entity';
 import { Project } from './entities/project.entity';
-import { Payment } from './entities/payment.entity';
+import { Debt } from './entities/payment.entity';
 import { DB_NAME } from 'src/constants';
 
 @Module({imports: [
@@ -23,7 +23,7 @@ import { DB_NAME } from 'src/constants';
         cli: {
           migrationsDir: "migrations"
         },
-        entities: [User, Pledge, Order, Invoice, Project, Payment],
+        entities: [User, Item, Order, Invoice, Project, Debt],
         synchronize: true
       }),
     ]})

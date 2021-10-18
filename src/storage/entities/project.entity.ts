@@ -1,6 +1,6 @@
-import { InvoiceStatus } from 'src/constants/invoice-status';
 import { ProjectStatus } from 'src/constants/project-status';
-import { Entity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Unique, OneToMany } from 'typeorm';
+import { Item } from './item.entity';
 
 @Entity()
 export class Project{
@@ -8,7 +8,7 @@ export class Project{
     id: number;
 
     @Column({length: 50})
-    projectName: string;
+    name: string;
 
     @Column({
         type: "enum",
@@ -22,4 +22,9 @@ export class Project{
 
     @Column({length: 100, nullable: true})
     details: string;
+
+    @OneToMany(_ => Item, pldg => pldg.project, {cascade: true})
+    items: Item[];
+    
+    //comment, usercomments[]?
 }

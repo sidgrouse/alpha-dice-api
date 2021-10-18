@@ -1,9 +1,8 @@
 import { type } from 'os';
 import { InvoiceStatus } from 'src/constants/invoice-status';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Payment } from './payment.entity';
-import { Pledge as Pledge } from './pledge.entity';
-import { User } from './user.entity';
+import { Debt as Debt } from './payment.entity';
+import { Item as Item } from './item.entity';
 
 @Entity()
 export class Invoice{
@@ -20,12 +19,12 @@ export class Invoice{
     @Column({default: 0})
     amount: number
 
-    @Column({default: 'base'})
+    @Column({default: 'K1'})
     name: string
 
-    @ManyToOne(() => Pledge, {cascade: true, eager: true})
-    pledge: Pledge;
+    @ManyToOne(() => Item, {cascade: true, eager: true})
+    pledge: Item;
 
-    @OneToMany(() => Payment, pmnt =>pmnt.invoice, {cascade: true})
-    userPayments: Payment[];
+    @OneToMany(() => Debt, pmnt =>pmnt.invoice, {cascade: true})
+    userDebts: Debt[];
 }

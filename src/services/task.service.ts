@@ -14,7 +14,6 @@ export class TasksService {
   async handleCron() {
     const debptors = await this._invoiceService.getDebptors();
     console.log('===cron==', debptors);
-    return;
     debptors.forEach(async user => {
         const debt = await this._invoiceService.getAllUserDebts(user.telegramId);
         const userTotal = debt.invoices.reduce((sum, inv) => sum + inv.amount, debt.identificationalAmount).toFixed(2); //helper?

@@ -4,7 +4,7 @@ import { Invoice } from './invoice.entity';
 import { Order } from './order.entity';
 
 @Entity()
-export class Payment{
+export class Debt{
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -15,9 +15,9 @@ export class Payment{
     })
     status: PaymentStatus;
     
-    @ManyToOne(() => Order, order => order.payments, {eager: true})
+    @ManyToOne(() => Order, order => order.debts, {eager: true})
     order: Order;
 
-    @ManyToOne(() => Invoice, inv => inv.userPayments, {eager: true})
+    @ManyToOne(() => Invoice, inv => inv.userDebts, {eager: true})
     invoice: Invoice;
 }

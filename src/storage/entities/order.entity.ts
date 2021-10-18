@@ -1,7 +1,7 @@
 import { InvoiceStatus } from 'src/constants/invoice-status';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Payment } from './payment.entity';
-import { Pledge } from './pledge.entity';
+import { Debt } from './payment.entity';
+import { Item } from './item.entity';
 import { User } from './user.entity';
 
 @Entity()
@@ -15,9 +15,9 @@ export class Order{
     @ManyToOne(() => User, user => user.orders, {eager: true})
     user: User;
 
-    @ManyToOne(() => Pledge)
-    pledge: Pledge;
+    @ManyToOne(() => Item)
+    item: Item;
 
-    @OneToMany(type => Payment, payment => payment.order, {cascade: true})
-    payments: Payment[]
+    @OneToMany(type => Debt, payment => payment.order, {cascade: true})
+    debts: Debt[]
 }

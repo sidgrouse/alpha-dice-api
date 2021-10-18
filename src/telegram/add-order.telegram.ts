@@ -15,7 +15,7 @@ import { Context } from 'telegraf';
 
   @SceneEnter()
   onSceneEnter(): string {
-    return "Send me order name/short name\n/cancel - back to the main menu";
+    return "Send me order name\n/cancel - назад в главное меню";
   }
 
     @Help()

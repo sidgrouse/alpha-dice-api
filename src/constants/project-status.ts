@@ -6,5 +6,6 @@ export enum ProjectStatus{
     IN_TRANSFER = "в дороге",
     ARRIVED = "приехало",
     GIVEN_AWAY = "выдано",
-    LOST = "потерялось"
+    LOST = "потерялось",
+    CANCELED = "отменен"
 }

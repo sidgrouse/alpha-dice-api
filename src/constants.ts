@@ -6,8 +6,13 @@ export const CRON_INVOICE_NOTIFICSTIONS = '45 * * * * *';
 
 
 
+
+
+
+
 export const enum SceneNames {
   ADD_INVOICE = 'ADD_INVOICE',
   ADD_ORDER = "ADD_ORDER",
-  DECLARE_PAYMENT = "DECLARE_PAYMENT"
+  DECLARE_PAYMENT = "DECLARE_PAYMENT",
+  ADD_PROJECT = "ADD_PROJECT"
 }

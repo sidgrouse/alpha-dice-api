@@ -22,5 +22,7 @@ export class UserService {
             user.telegramId = telegramId;
             await this.userRepository.save(user);
         }
+
+        //add user info
     }
 }
