@@ -30,7 +30,9 @@ import { InvoiceService } from '../services/invoice.service';
     @Command('invoices')
     async getInfo(@Ctx() context: Context) : Promise<string>{
       const debt = await this.invoiceService.getAllUserDebts(context.from.id);
-      console.log(debt);
+      if(debt.invoices.length === 0){
+        return 'У вас нет активных счетов на оплату';
+      }
       const invString = debt.invoices.map(inv => inv.toString(debt.identificationalAmount)).join('\n');
 
       return `${invString}\nPlease note that it is essential to pay the exact price without rounding! Otherwise we cannot map you with your payment`;

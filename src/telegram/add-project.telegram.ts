@@ -14,12 +14,12 @@ import { Context } from 'telegraf';
 
   @SceneEnter()
   onSceneEnter(): string {
-    return "Формат ввода: имя проекта:url:детали:названия пледжей через запятую\n/cancel - назад в главное меню";///////////////////////
+    return "Формат ввода: имя проекта|url|детали|названия пледжей через запятую\n/cancel - назад в главное меню";///////////////////////
   }
 
     @Help()
     async onHelp(): Promise<string> {
-      return "Формат ввода: имя проекта:url:детали:названия пледжей через запятую\n/cancel - назад в главное меню";
+      return "Формат ввода: имя проекта|url|детали|названия пледжей через запятую\n/cancel - назад в главное меню";
     }
 
     @Command('cancel')
@@ -29,18 +29,21 @@ import { Context } from 'telegraf';
     }
 
     @On('text')
-    async onMessage(@Ctx() ctx: Context, @Message() messageObject : any){
+    async onMessage(@Message() messageObject : any, @Ctx() context: SceneCtx){
       const message : string = messageObject.text;
       if(message.startsWith('/')){
         return;
       }
 
-      const elmts = message.split(':');
+      const elmts = message.split('|');
       if(elmts.length < 4){
         throw new TelegrafException('Wrong format in project');
       }
 
-      const success = this._projectService.tryAddProject(elmts[0], elmts[1], elmts[2], elmts[3].split(','));
+      console.log('--------------', elmts, elmts[3].split(','));
+
+      const success = await this._projectService.tryAddProject(elmts[0], elmts[1], elmts[2], elmts[3].split(','));
+      await context.scene.leave();
       return success ? `${elmts[0]} добавлен` : 'Ошибка';
     }
   }

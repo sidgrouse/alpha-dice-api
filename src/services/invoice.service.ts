@@ -79,7 +79,7 @@ export class InvoiceService {
     async declarePayment(telegramId: number, invoiceIds: number[]) : Promise<InvoiceDto[]>{ //TODO: remake, add splitting
         console.log('invIds', invoiceIds);
         const user = await this.userRepository.findOneOrFail({
-            relations: ["orders", "orders.debts", "orders.debts.order", "orders.debts.orders.item", "orders.debts.invoice", "orders.debts.invoice.pledge"],
+            relations: ["orders", "orders.debts", "orders.debts.order", "orders.debts.order.item", "orders.debts.invoice", "orders.debts.invoice.pledge"],
             where: {telegramId: telegramId}
         });
     
@@ -110,7 +110,7 @@ export class InvoiceService {
     
     async getAllUserDebts(telegramId: number): Promise<DebtDto> {
         const user = await this.userRepository.findOneOrFail({
-                relations: ["orders", "orders.debts", "orders.debts.order", "orders.debts.orders.item", "orders.debts.invoice", "orders.debts.invoice.pledge"],
+                relations: ["orders", "orders.debts", "orders.debts.order", "orders.debts.order.item", "orders.debts.invoice", "orders.debts.invoice.pledge"],
                 where: {telegramId: telegramId}
             }); //TODO: remove "orders.debts.order" etc. Preload or something
         

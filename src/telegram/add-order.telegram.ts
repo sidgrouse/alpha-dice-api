@@ -30,13 +30,14 @@ import { Context } from 'telegraf';
     }
 
     @On('text')
-    async onMessage(@Ctx() ctx: Context, @Message() messageObject : any){
+    async onMessage(@Message() messageObject : any, @Ctx() context: SceneCtx){
       const message : string = messageObject.text;
       if(message.startsWith('/')){
         return;
       }
 
-      this._invoiceService.addOrder(message, ctx.from.id);
+      await this._invoiceService.addOrder(message, context.from.id);
+      await context.scene.leave();
       return "done";
     }
   }

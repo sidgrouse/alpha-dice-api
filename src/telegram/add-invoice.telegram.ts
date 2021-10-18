@@ -29,7 +29,7 @@ import { InvoiceService } from 'src/services/invoice.service';
     }
 
     @On('text')
-    async onMessage(@Message() messageObject : any){
+    async onMessage(@Message() messageObject : any, @Ctx() context: SceneCtx){
       const message : string = messageObject.text;
       if(message.startsWith('/')){
         return;
@@ -41,6 +41,7 @@ import { InvoiceService } from 'src/services/invoice.service';
       }
 
       this._invoiceService.addInvoice(invoiceElements[0], Number.parseFloat(invoiceElements[1]));
+      await context.scene.leave();
       return 'done';
     }
   }

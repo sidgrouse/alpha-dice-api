@@ -60,8 +60,8 @@ import { Context, Telegraf } from 'telegraf';
     @Command('confirm')
     async onConfirm(@Ctx() context: SceneCtx) {
       const declared = await this._invoiceService.declarePayment(context.from.id, this._declaredInvoiceIds);
-      await context.scene.leave();
       const invoices = declared.map(itm => itm.toString()).join('\n -');
+      await context.scene.leave();
       return `Отмечены оплаченными:\n\n -${invoices}`;
     }
 
