@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Project } from 'src/storage/entities/project.entity';
 import { ProjectStatus } from 'src/constants/project-status';
 import { Item } from 'src/storage/entities/item.entity';
-import { Invoice } from 'src/storage/entities/invoice.entity';
 import { ItemDto } from 'src/dto/item.dto';
 import { InvoiceService } from './invoice.service';
 
@@ -38,8 +37,7 @@ export class ProjectService {
 
             const result = await this._projectRepository.save(project);
             if(result){
-                console.log('!!!!!!', result.items);
-                result.items.forEach(async itm => await this._invoiceService.addInvoice(itm.id, itm.priceK1rub));
+                result.items.forEach(async itm => await this._invoiceService.addInvoice(itm.id, itm.priceK1rub, 'K1'));
             }
             return true;
         }

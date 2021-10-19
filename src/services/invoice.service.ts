@@ -52,11 +52,12 @@ export class InvoiceService {
         //TODO: check invoices added after getting but before saving here
     } //pledgeservice
 
-    async addInvoiceByName(itemName: string, amount : number, description: string = ''): Promise<void> {
+    async addInvoiceByName(itemName: string, amount : number, description: string, status: InvoiceStatus = InvoiceStatus.TO_PAY): Promise<void> {
         const pledge = await this._itemRepository.findOne({where: {name: itemName}, relations: ["orders", "orders.user"] });
+        return this.addInvoice(pledge.id, amount, description, status);
     }
 
-    async addInvoice(itemId: number, amount : number, description: string = ''): Promise<void> {
+    async addInvoice(itemId: number, amount : number, description: string, status: InvoiceStatus = InvoiceStatus.TO_PAY): Promise<void> {
         const item = await this._itemRepository.findOne(itemId, {relations: ["orders", "orders.user"] });
 
         const invoice = new Invoice();
@@ -69,7 +70,8 @@ export class InvoiceService {
         });
         invoice.pledge = item;
         invoice.amount = amount;
-        invoice.status = InvoiceStatus.TO_PAY; //TODO: make it no_info, change after pay date or after command
+        invoice.name = description;
+        invoice.status = status;
         const invEntity = await this.invoiceRepository.save(invoice);
 
         item.orders.map(ord =>this.checkAssignNewUtid(ord.user));

@@ -11,7 +11,6 @@ import { Context, Telegraf } from 'telegraf';
   @UseFilters(TelegrafExceptionFilter)
   export class DeclarePaymentTgScene {
     private _declaredInvoiceIds: number[];
-    private _people: string[];
     
     constructor(
       @InjectBot() private _bot: Telegraf<any>,
@@ -52,8 +51,7 @@ import { Context, Telegraf } from 'telegraf';
     async onHelp(@Ctx() context: Context): Promise<string> {
       const debt = await this._invoiceService.getAllUserDebts(context.from.id);
       const userTotal = debt.invoices.reduce((sum, inv) => sum + inv.amount, debt.identificationalAmount).toFixed(2); //helper?
-      return this._people.join(',');
-      //return `Активный долг - ${userTotal}руб\n/cancel - назад в главное меню`;
+      return `Активный долг - ${userTotal}руб\n/cancel - назад в главное меню`;
     }
 
     @Command('confirm')
