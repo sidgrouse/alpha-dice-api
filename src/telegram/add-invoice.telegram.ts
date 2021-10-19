@@ -8,7 +8,7 @@ import { InvoiceService } from 'src/services/invoice.service';
 
   @UseFilters(TelegrafExceptionFilter)
   @Scene(SceneNames.ADD_INVOICE)
-  export class AddInvoiceTgSceneController {
+  export class AddInvoiceTgScene {
     constructor(private _invoiceService: InvoiceService){
     }
 
@@ -40,7 +40,7 @@ import { InvoiceService } from 'src/services/invoice.service';
         throw new TelegrafException('Wrong format');
       }
 
-      this._invoiceService.addInvoice(invoiceElements[0], Number.parseFloat(invoiceElements[1]));
+      this._invoiceService.addInvoiceByName(invoiceElements[0], Number.parseFloat(invoiceElements[1]));
       await context.scene.leave();
       return 'done';
     }

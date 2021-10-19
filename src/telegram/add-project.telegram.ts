@@ -4,6 +4,7 @@ import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { SceneNames } from 'src/constants';
 import { ProjectService } from 'src/services/project.service';
+import { Invoice } from 'src/storage/entities/invoice.entity';
 import { Context } from 'telegraf';
   
   @UseFilters(TelegrafExceptionFilter)
@@ -40,9 +41,8 @@ import { Context } from 'telegraf';
         throw new TelegrafException('Wrong format in project');
       }
 
-      console.log('--------------', elmts, elmts[3].split(','));
-
-      const success = await this._projectService.tryAddProject(elmts[0], elmts[1], elmts[2], elmts[3].split(','));
+      const invoices = elmts[3].split(',').map(itm => { return {name: itm.split(' ')[0], invoiceK1Amount: Number(itm.split(' ')[1])} });
+      const success = await this._projectService.tryAddProject(elmts[0], elmts[1], elmts[2], invoices);
       await context.scene.leave();
       return success ? `${elmts[0]} добавлен` : 'Ошибка';
     }

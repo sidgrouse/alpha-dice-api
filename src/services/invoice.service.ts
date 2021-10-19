@@ -20,7 +20,7 @@ export class InvoiceService {
         @InjectRepository(User)
         private userRepository: Repository<User>,
         @InjectRepository(Item)
-        private pledgeRepository: Repository<Item>,
+        private _itemRepository: Repository<Item>,
         @InjectRepository(Order)
         private orderRepository: Repository<Order>,
         @InjectRepository(Invoice)
@@ -29,11 +29,10 @@ export class InvoiceService {
         private paymentRepository: Repository<Debt>
       ) {}
 
-    async addOrder(pledgeName: string, userTelegramId : number, count = 1): Promise<void> {
+    async addOrder(itemId: number, userTelegramId : number, count = 1): Promise<void> {
         const user = await this.getUserByTgId(userTelegramId);
 
-        const pledge = await this.pledgeRepository.findOneOrFail({where: { name: pledgeName }, relations: ["invoices", "invoices.userDebts"] })
-            || await this.pledgeRepository.findOne({where: { shortName: pledgeName }, relations: ["invoices", "invoices.userDebts"] });
+        const pledge = await this._itemRepository.findOneOrFail(itemId, {relations: ["invoices", "invoices.userDebts"] });
 
         let order = new Order();
         order.debts = pledge.invoices.map(inv => {
@@ -53,24 +52,27 @@ export class InvoiceService {
         //TODO: check invoices added after getting but before saving here
     } //pledgeservice
 
-    async addInvoice(pledgeName: string, amount : number, description: string = ''): Promise<void> {
-        const pledge = await this.pledgeRepository.findOne({where: { name: pledgeName }, relations: ["orders", "orders.user"] })
-        || await this.pledgeRepository.findOne({where: { shortName: pledgeName }, relations: ["orders", "order.user"] });
+    async addInvoiceByName(itemName: string, amount : number, description: string = ''): Promise<void> {
+        const pledge = await this._itemRepository.findOne({where: {name: itemName}, relations: ["orders", "orders.user"] });
+    }
+
+    async addInvoice(itemId: number, amount : number, description: string = ''): Promise<void> {
+        const item = await this._itemRepository.findOne(itemId, {relations: ["orders", "orders.user"] });
 
         const invoice = new Invoice();
-        invoice.userDebts = pledge.orders.map(order => {
+        invoice.userDebts = item.orders.map(order => {
             const payment = new Debt();
             payment.order = order;
             payment.invoice = invoice;
             payment.status = PaymentStatus.NO_INFO;
             return payment;
         });
-        invoice.pledge = pledge;
+        invoice.pledge = item;
         invoice.amount = amount;
         invoice.status = InvoiceStatus.TO_PAY; //TODO: make it no_info, change after pay date or after command
         const invEntity = await this.invoiceRepository.save(invoice);
 
-        pledge.orders.map(ord =>this.checkAssignNewUtid(ord.user));
+        item.orders.map(ord =>this.checkAssignNewUtid(ord.user));
 
         //TODO: check orders added after getting but before saving here
         console.log('add-inv', invEntity);

@@ -29,6 +29,6 @@ export class Item{
     @OneToMany(_ => Invoice, inv => inv.pledge)
     invoices: Invoice[];
 
-    @ManyToOne(_ => Project, ) //TODO: use https://github.com/bashleigh/typeorm-polymorphic ?
+    @ManyToOne(_ => Project, proj => proj.items, {eager: true}) //TODO: use https://github.com/bashleigh/typeorm-polymorphic ?
     project: Project;
 }

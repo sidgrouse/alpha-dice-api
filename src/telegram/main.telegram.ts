@@ -11,7 +11,7 @@ import { InvoiceService } from '../services/invoice.service';
   
   @Update()
   @UseFilters(TelegrafExceptionFilter)
-  export class MainTgController {
+  export class MainTgScene {
     constructor(private readonly invoiceService: InvoiceService,
       private readonly userService: UserService){}
 

@@ -6,9 +6,9 @@ import { TelegrafModule } from 'nestjs-telegraf';
 import { sessionMiddleware } from 'src/common/middleware';
 import { getEnvironmentData } from 'worker_threads';
 
-import { MainTgController as MainTgScene } from '../telegram/main.telegram';
-import { AddInvoiceTgSceneController as AddInvoiceTgScene } from 'src/telegram/add-invoice.telegram';
-import { AddOrderTgSceneController as AddOrderTgScene } from 'src/telegram/add-order.telegram';
+import { MainTgScene } from '../telegram/main.telegram';
+import { AddInvoiceTgScene } from 'src/telegram/add-invoice.telegram';
+import { AddOrderTgScene } from 'src/telegram/add-order.telegram';
 
 import { User } from 'src/storage/entities/user.entity';
 import { Item } from 'src/storage/entities/item.entity';

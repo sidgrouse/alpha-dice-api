@@ -24,11 +24,10 @@ import { Context, Telegraf } from 'telegraf';
     const debt = await this._invoiceService.getAllUserDebts(context.from.id);
     
     if(debt.invoices.length > 0){
-      const userTotal = debt.invoices.reduce((sum, inv) => sum + inv.amount, debt.identificationalAmount).toFixed(2); //helper?
       const inlineKeyboardOrders = debt.invoices.map(inv => 
         [{
             text: inv.toString(debt.identificationalAmount),
-            callback_data: `inv_${context.from.username}_${inv.invoiceId}`
+            callback_data: `declare_payment_${context.from.username}_${inv.invoiceId}`
         }]
       );
       await this._bot.telegram.sendMessage(context.from.id,
@@ -38,7 +37,7 @@ import { Context, Telegraf } from 'telegraf';
             inline_keyboard: inlineKeyboardOrders
           }
         });
-      debt.invoices.map(inv => this._bot.action(`inv_${context.from.username}_${inv.invoiceId}`, async itm => {
+      debt.invoices.map(inv => this._bot.action(`declare_payment_${context.from.username}_${inv.invoiceId}`, async itm => {
         this._declaredInvoiceIds.push(inv.invoiceId); //check if exist
         await this._bot.telegram.sendMessage(context.from.id, `${inv.pledjeName} добавлен в список. /confirm - подтвердить`);
       }));

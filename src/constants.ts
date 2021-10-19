@@ -1,7 +1,7 @@
 export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
 export const INVOICE_REPOSITORY = 'INVOICE_REPOSITORY';
 export const DB_NAME = 'AlphaDiceDb';
-export const CRON_INVOICE_NOTIFICSTIONS = '45 * * * * *';
+export const CRON_INVOICE_NOTIFICATIONS = '45 * * * * *';
 
 
 
