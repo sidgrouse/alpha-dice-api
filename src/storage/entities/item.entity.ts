@@ -8,7 +8,7 @@ export class Item{
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({length: 50, unique: true})
+    @Column({length: 50})
     name: string;
 
     @Column({nullable: true})

@@ -4,41 +4,53 @@ import { async, from } from 'rxjs';
 import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { SceneNames } from 'src/constants';
+import { DebtDto } from 'src/dto/debt.dto';
+import { InvoiceDto } from 'src/dto/invoice.dto';
 import { InvoiceService } from 'src/services/invoice.service';
 import { Context, Telegraf } from 'telegraf';
   
   @Scene(SceneNames.DECLARE_PAYMENT)
   @UseFilters(TelegrafExceptionFilter)
   export class DeclarePaymentTgScene {
-    private _declaredInvoiceIds: number[];
+    private _debt: DebtDto;
+    private _declaredInvoices: InvoiceDto[];
     
     constructor(
       @InjectBot() private _bot: Telegraf<any>,
       private _invoiceService: InvoiceService){
-        this._declaredInvoiceIds = [];
+        this._declaredInvoices = [];
     }
 
   @SceneEnter()
   async onSceneEnter(@Ctx() context: SceneCtx): Promise<void> {
-    const debt = await this._invoiceService.getAllUserDebts(context.from.id);
+    this._debt = await this._invoiceService.getAllUserDebts(context.from.id);
     
-    if(debt.invoices.length > 0){
-      const inlineKeyboardOrders = debt.invoices.map(inv => 
+    if(this._debt.invoices.length > 0){
+      const inlineKeyboardOrders = this._debt.invoices.map(inv => 
         [{
-            text: inv.toString(debt.identificationalAmount),
+            text: inv.toString(this._debt.identificationalAmount),
             callback_data: `declare_payment_${context.from.username}_${inv.invoiceId}`
         }]
       );
       await this._bot.telegram.sendMessage(context.from.id,
-        "Выберите инвойсы для подтверждения оплаты",
+        "Выберите инвойсы для подтверждения оплаты одним платежом",
         {
           reply_markup: {
             inline_keyboard: inlineKeyboardOrders
           }
         });
-      debt.invoices.map(inv => this._bot.action(`declare_payment_${context.from.username}_${inv.invoiceId}`, async itm => {
-        this._declaredInvoiceIds.push(inv.invoiceId); //check if exist
-        await this._bot.telegram.sendMessage(context.from.id, `${inv.pledjeName} добавлен в список. /confirm - подтвердить`);
+        this._debt.invoices.map(inv => this._bot.action(`declare_payment_${context.from.username}_${inv.invoiceId}`, async localCtx => {
+        const isAlreadyAdded = this._declaredInvoices.some(di => di.invoiceId === inv.invoiceId);
+        if(isAlreadyAdded){
+          this._declaredInvoices = this._declaredInvoices.filter(di => di.invoiceId === inv.invoiceId);
+        }
+        else{
+          this._declaredInvoices.push(inv);
+        }
+          
+        await this._bot.telegram.sendMessage(context.from.id, 
+          `${this._declaredInvoices.map(inv => inv.toString()).join(', ')}\n К оплате одним платежом `+
+          `${this._declaredInvoices.reduce((sum, inv) => sum + inv.amount, this._debt.identificationalAmount).toFixed(2)}р.\n/confirm - отметить оплаченным`);
       }));
     }
     else{
@@ -49,14 +61,12 @@ import { Context, Telegraf } from 'telegraf';
 
     @Help()
     async onHelp(@Ctx() context: Context): Promise<string> {
-      const debt = await this._invoiceService.getAllUserDebts(context.from.id);
-      const userTotal = debt.invoices.reduce((sum, inv) => sum + inv.amount, debt.identificationalAmount).toFixed(2); //helper?
-      return `Активный долг - ${userTotal}руб\n/cancel - назад в главное меню`;
+      return `Активный долг - ${this._debt.getTotal()}руб\n\n/cancel - назад в главное меню`;
     }
 
     @Command('confirm')
     async onConfirm(@Ctx() context: SceneCtx) {
-      const declared = await this._invoiceService.declarePayment(context.from.id, this._declaredInvoiceIds);
+      const declared = await this._invoiceService.declarePayment(context.from.id, this._declaredInvoices.map(inv => inv.invoiceId));
       const invoices = declared.map(itm => itm.toString()).join('\n -');
       await context.scene.leave();
       return `Отмечены оплаченными:\n\n -${invoices}`;

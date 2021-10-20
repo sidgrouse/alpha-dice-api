@@ -13,6 +13,7 @@ import { Invoice } from 'src/storage/entities/invoice.entity';
 import { Debt } from 'src/storage/entities/payment.entity';
 import { PaymentStatus } from 'src/constants/payment-status';
 import { InvoiceDto } from 'src/dto/invoice.dto';
+import { ArgumentOutOfRangeError } from 'rxjs';
 
 @Injectable()
 export class InvoiceService {
@@ -32,17 +33,22 @@ export class InvoiceService {
     async addOrder(itemId: number, userTelegramId : number, count = 1): Promise<void> {
         const user = await this.getUserByTgId(userTelegramId);
 
-        const pledge = await this._itemRepository.findOneOrFail(itemId, {relations: ["invoices", "invoices.userDebts"] });
+        const item = await this._itemRepository.findOneOrFail(itemId, {relations: ["invoices", "invoices.userDebts"] });
 
+        const existedOrder = await this.orderRepository.findOne({where: {user: user, item: item}})
+        if(existedOrder){
+            throw new Error('Order already exist. You only can edit or remove it');
+        }
+        
         let order = new Order();
-        order.debts = pledge.invoices.map(inv => {
+        order.debts = item.invoices.map(inv => {
              const payment = new Debt();
              payment.invoice = inv;
              payment.order = order;
              payment.status = PaymentStatus.NO_INFO;
              return payment;
             });
-        order.item = pledge;
+        order.item = item;
         order.user = user;
         order.count = count;
         this.orderRepository.save(order);
@@ -103,7 +109,7 @@ export class InvoiceService {
         await this.paymentRepository.save(declaredPayments);
 
         return declaredPayments.map(pmnt => 
-            new InvoiceDto(pmnt.invoice.id, pmnt.order.item.name, pmnt.invoice.name , pmnt.invoice.amount));
+            new InvoiceDto(pmnt.invoice.id, pmnt.order.item.name, pmnt.order.item.project.name, pmnt.invoice.name , pmnt.invoice.amount));
     }
 
     async getDebptors(): Promise<UserDto[]> {
@@ -121,7 +127,7 @@ export class InvoiceService {
         const invoicesToPay = user.orders
             .flatMap(order => order.debts)
             .filter(p => p.status === PaymentStatus.NO_INFO && p.invoice.status === InvoiceStatus.TO_PAY)
-            .map(pmnt => new InvoiceDto(pmnt.invoice.id, pmnt.order.item.name, pmnt.invoice.name , pmnt.invoice.amount));
+            .map(pmnt => new InvoiceDto(pmnt.invoice.id, pmnt.order.item.name, pmnt.order.item.project.name, pmnt.invoice.name , pmnt.invoice.amount));
 
         this.checkAssignNewUtid(user);
         console.log('invSrv.get_user', user);

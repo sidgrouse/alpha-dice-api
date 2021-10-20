@@ -33,9 +33,13 @@ import { InvoiceService } from '../services/invoice.service';
       if(debt.invoices.length === 0){
         return 'У вас нет активных счетов на оплату';
       }
-      const invString = debt.invoices.map(inv => inv.toString(debt.identificationalAmount)).join('\n');
+      const joinedInvoices = debt.invoices.map(inv => inv.toString()).join('\n');
 
-      return `${invString}\nPlease note that it is essential to pay the exact price without rounding! Otherwise we cannot map you with your payment`;
+      return `Итого: ${debt.getTotal()}\n\n${joinedInvoices}\n\nВажно! Любой ваш платеж должен содержать ровно указанное число копеек (до 9.99руб) плюсом к ровной сумме\n`+
+      `Копейки не являются частью платежа, а служат для его идентификации как вашего, поэтому их нужно прибавить лишь один раз на каждый платеж.\n` +
+      `Например, если вы пока готовы перевести 1000р за один проект и 2000 за другой одним платежом, то необходимо сложить эти суммы,` +
+      `прибавить ${debt.identificationalAmount}р. и перевести ${3000+debt.identificationalAmount}. Либо не заморачивайтесь и просто `+
+      `переведите ${debt.getTotal()}`;
     }
 
     @Command('add_order')
@@ -43,11 +47,11 @@ import { InvoiceService } from '../services/invoice.service';
       context.scene.enter(SceneNames.ADD_ORDER);
     }
 
-    @Command('admin')
+    @Command('admin') // TODO: move to help with check
     @UseGuards(AdminGuard)
     async onAdminHelp(@Ctx() context: Context) : Promise<string>{
-      return '/add_invoice - выставить инвойс за существующий проект (будет доделано)'+
-      ///'/pay - -----'+
+      return '/add_invoice - выставить инвойс за существующий проект'+
+      '/pay - -----'+
       '';
     }
 

@@ -17,11 +17,11 @@ export class TasksService {
     debptors.forEach(async user => {
         const debt = await this._invoiceService.getAllUserDebts(user.telegramId);
         const debtDetails = debt.invoices.map(itm => 
-          `${itm.pledjeName}${itm.invoiceName ? '('+itm.invoiceName+') ' : ' '} ${itm.amount + debt.identificationalAmount}руб`)
+          `${itm.itemName}${itm.invoiceName ? '('+itm.invoiceName+') ' : ' '} ${itm.amount + debt.identificationalAmount}руб`)
           .join('\n'); //TODO: helper?
         this.bot.telegram.sendMessage(user.telegramId, 
-          `Активные платежи за игры\nИтого:${debt.getTotal()}\nДетали:${debtDetails}\n` +
-          `Не забудьте добавить ${debt.identificationalAmount.toFixed(2)} к каждому переводу для идентификации его как вашего\n` +
+          `Активные платежи за игры\nИтого: ${debt.getTotal()}\nДетали:${debtDetails}\n` +
+          `Не забудьте добавить ${debt.identificationalAmount.toFixed(2)} к каждому переводу для идентификации его как вашего\n\n` +
           `/declare_payment для подтверждения платежей`);
         await this.delay(100);
     });

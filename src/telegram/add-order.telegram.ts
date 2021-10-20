@@ -1,4 +1,5 @@
 import { UseFilters } from '@nestjs/common';
+import { captureRejections } from 'events';
 import {Ctx, Help, Command, Message, Scene, SceneEnter, On, TelegrafException, InjectBot, } from 'nestjs-telegraf';
 import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
@@ -6,7 +7,7 @@ import { SceneNames } from 'src/constants';
 import { ItemDto } from 'src/dto/item.dto';
 import { InvoiceService } from 'src/services/invoice.service';
 import { ProjectService } from 'src/services/project.service';
-import { Telegraf } from 'telegraf';
+import { Context, Telegraf } from 'telegraf';
   
   @UseFilters(TelegrafExceptionFilter)
   @Scene(SceneNames.ADD_ORDER)
@@ -20,7 +21,7 @@ import { Telegraf } from 'telegraf';
     }
 
     @SceneEnter()
-    async onSceneEnter(@Ctx() context: SceneCtx): Promise<void> {
+    async onSceneEnter(@Ctx() context: SceneCtx, @Ctx() c: Context): Promise<void> {
       const projects = await this._projectService.getAllAvailableItems();
       
       if(projects.length > 0){
@@ -37,9 +38,16 @@ import { Telegraf } from 'telegraf';
               inline_keyboard: inlineKeyboardOrders
             }
           });
-        projects.map(prj => this._bot.action(`prj_${context.from.username}_${prj.id}`, async itm => {
-          await this._invoiceService.addOrder(prj.id, context.from.id);
-          await this._bot.telegram.sendMessage(context.from.id, `${prj.toString()} добавлен в список ваших заказов.`);
+        projects.map(prj => this._bot.action(`prj_${context.from.username}_${prj.id}`, async localContext => {
+          try{
+            await this._invoiceService.addOrder(prj.id, context.from.id);
+            await this._bot.telegram.sendMessage(context.from.id, `${prj.toString()} добавлен в список ваших заказов.`);
+            await localContext.editMessageReplyMarkup({inline_keyboard: null});
+          } 
+          catch(exception){
+            console.warn(exception);
+            await this._bot.telegram.sendMessage(context.from.id, exception.message);
+          }
         }));
       }
       else{

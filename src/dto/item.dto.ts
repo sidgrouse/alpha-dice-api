@@ -5,6 +5,6 @@ export class ItemDto{
     }
 
     toString(): string{
-        return `${this.name}${this.projectName === this.name ? ' ' : '('+this.projectName+') '} - ${this.projectStatus}`;
+        return `${this.projectName}${this.projectName === this.name ? ' ' : '('+this.name+') '} - ${this.projectStatus}`;
     }
 }

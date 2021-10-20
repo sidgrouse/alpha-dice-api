@@ -37,14 +37,16 @@ import { WizardScene } from 'telegraf/typings/scenes';
               inline_keyboard: inlineKeyboardOrders
             }
           });
-        projects.map(itm => this._bot.action(`addinv_${context.from.username}_${itm.id}`, async _ => {
+        projects.map(itm => this._bot.action(`addinv_${context.from.username}_${itm.id}`, async localContext => {
           context.state.itemId = itm.id;
           context.state.name = itm.toString();
+          await localContext.editMessageReplyMarkup({inline_keyboard: null});
           context.scene.enter(SceneNames.ADD_INVOICE_DETAILS);
         }));
       }
       else{
-        await this._bot.telegram.sendMessage(context.from.id, "Нет доступных проектов. Сначала необходимо создать проект и наименование(aka пледж, айтем) в главном меню");
+        await this._bot.telegram.sendMessage(context.from.id,
+          "Нет доступных проектов. Сначала необходимо создать проект и пункт(aka пледж, айтем) в главном меню");
       }
       context.scene.leave();
     }
@@ -80,6 +82,12 @@ import { WizardScene } from 'telegraf/typings/scenes';
       this._itemName = context.state.name;
       return `Выставление нового инвойса за ${context.state.name}.(${context.state.itemId}) `+
       `Формат:\nза что:сколько[:${DetailsAddInvoiceTgScene._waitingMarkerConst}] (за что:сколько для активации)\n`;
+    }
+
+    @Command('cancel')
+    async onCancel(@Ctx() context: SceneCtx) {
+      await context.scene.leave();
+      return 'back to main menu';
     }
 
     @On('text')
