@@ -1,15 +1,11 @@
 import {
-  Update,
   Ctx,
-  Start,
   Help,
   Command,
   Message,
-  TelegrafExecutionContext,
   Scene,
   SceneEnter,
   On,
-  Hears,
   TelegrafException,
 } from 'nestjs-telegraf';
 import { SceneCtx } from 'src/common/scene-context.interface';
