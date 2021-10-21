@@ -1,6 +1,6 @@
 export enum InvoiceStatus{
-    NO_INFO = 1,
-    NOTIFICATION_NEEDED = 2,
-    PAYMENT_DECLARED = 3,
-    PAYMENT_CONFIRMED = 4
+    NO_INFO = "no_info",
+    WAITING = "waiting",
+    TO_PAY = "started",
+    CLOSED = "closed"
 }
