@@ -24,7 +24,7 @@ import { Context } from 'telegraf';
     }
 
     @Command('cancel')
-    async onAddInvoice(@Ctx() context: SceneCtx) {
+    async onCancel(@Ctx() context: SceneCtx) {
       await context.scene.leave();
       return 'back to main menu';
     }

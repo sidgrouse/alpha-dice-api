@@ -1,6 +1,6 @@
 import { InvoiceStatus } from 'src/constants/invoice-status';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Debt } from './payment.entity';
+import { Debt } from './debt.entity';
 import { Item } from './item.entity';
 import { User } from './user.entity';
 

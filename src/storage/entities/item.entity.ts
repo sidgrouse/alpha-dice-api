@@ -26,7 +26,7 @@ export class Item{
     @OneToMany(_ => Order, order => order.item)
     orders: Order[];
 
-    @OneToMany(_ => Invoice, inv => inv.pledge)
+    @OneToMany(_ => Invoice, inv => inv.item)
     invoices: Invoice[];
 
     @ManyToOne(_ => Project, proj => proj.items, {eager: true}) //TODO: use https://github.com/bashleigh/typeorm-polymorphic ?

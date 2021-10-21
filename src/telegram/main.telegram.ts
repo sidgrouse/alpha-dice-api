@@ -59,6 +59,11 @@ import { InvoiceService } from '../services/invoice.service';
     async addProject(@Ctx() context: SceneCtx){
       context.scene.enter(SceneNames.ADD_PROJECT);
     }
+    
+    @Command('declare_payment')
+    async onDeclarePayment(@Ctx() context: SceneContext){
+      await context.scene.enter(SceneNames.DECLARE_PAYMENT);
+    }
 
     @Command('add_invoice')
     @UseGuards(AdminGuard)
@@ -66,8 +71,9 @@ import { InvoiceService } from '../services/invoice.service';
       await context.scene.enter(SceneNames.ADD_INVOICE);
     }
 
-    @Command('declare_payment')
-    async onDeclarePayment(@Ctx() context: SceneContext){
-      await context.scene.enter(SceneNames.DECLARE_PAYMENT);
+    @Command('confirm_payments')
+    @UseGuards(AdminGuard)
+    async onConfirmPayments(@Ctx() context: SceneCtx) {
+      await context.scene.enter(SceneNames.CONFIRM_PAYMENT);
     }
   }

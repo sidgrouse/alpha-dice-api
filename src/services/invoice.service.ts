@@ -10,7 +10,7 @@ import { User } from 'src/storage/entities/user.entity';
 import { Item } from 'src/storage/entities/item.entity';
 import { Order } from '../storage/entities/order.entity';
 import { Invoice } from 'src/storage/entities/invoice.entity';
-import { Debt } from 'src/storage/entities/payment.entity';
+import { Debt } from 'src/storage/entities/debt.entity';
 import { PaymentStatus } from 'src/constants/payment-status';
 import { InvoiceDto } from 'src/dto/invoice.dto';
 import { ArgumentOutOfRangeError } from 'rxjs';
@@ -74,7 +74,7 @@ export class InvoiceService {
             payment.status = PaymentStatus.NO_INFO;
             return payment;
         });
-        invoice.pledge = item;
+        invoice.item = item;
         invoice.amount = amount;
         invoice.name = description;
         invoice.status = status;
@@ -89,7 +89,7 @@ export class InvoiceService {
     async declarePayment(telegramId: number, invoiceIds: number[]) : Promise<InvoiceDto[]>{ //TODO: remake, add splitting
         console.log('invIds', invoiceIds);
         const user = await this.userRepository.findOneOrFail({
-            relations: ["orders", "orders.debts", "orders.debts.order", "orders.debts.order.item", "orders.debts.invoice", "orders.debts.invoice.pledge"],
+            relations: ["orders", "orders.debts", "orders.debts.order", "orders.debts.order.item", "orders.debts.invoice", "orders.debts.invoice.item"],
             where: {telegramId: telegramId}
         });
     
@@ -120,7 +120,7 @@ export class InvoiceService {
     
     async getAllUserDebts(telegramId: number): Promise<DebtDto> {
         const user = await this.userRepository.findOneOrFail({
-                relations: ["orders", "orders.debts", "orders.debts.order", "orders.debts.order.item", "orders.debts.invoice", "orders.debts.invoice.pledge"],
+                relations: ["orders", "orders.debts", "orders.debts.order", "orders.debts.order.item", "orders.debts.invoice", "orders.debts.invoice.item"],
                 where: {telegramId: telegramId}
             }); //TODO: remove "orders.debts.order" etc. Preload or something
         
