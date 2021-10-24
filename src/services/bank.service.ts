@@ -22,7 +22,7 @@ export class BankService {
     }
 
     async parseLogs(logs: string): Promise<number>{
-        const tinkoffRegex = new RegExp('^[^;]+?;[^;]+?;[^;]+?;"OK";"(?<sum>[\\d]+,[\\d]{2})";"RUB";[^;]+?;"RUB";[^;]+?;[^;]+?;[^;]+?;"(?<name>[^;"]+?)"', 'gm'); //TODO: move to appsettings
+        const tinkoffRegex = new RegExp('^[^;]+?;[^;]+?;[^;]+?;"OK";"(?<sum>[\\d]+,[\\d]{2})";"RUB";[^;]+?;"RUB";[^;]+?;[^;]+?;[^;]+?;"(?<from>[^;"]+?)"', 'gm'); //TODO: move to appsettings
 
         const matches = [...logs.matchAll(tinkoffRegex)];
         const allPayments = await this.getPayments(matches);
