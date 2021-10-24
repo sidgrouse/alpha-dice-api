@@ -22,7 +22,7 @@ export class Invoice{
     @Column({default: 'K1'})
     name: string
 
-    @ManyToOne(() => Item, {cascade: true, eager: true})
+    @ManyToOne(() => Item, {cascade: true, eager: true, nullable: true})
     item: Item;
 
     @OneToMany(() => Debt, pmnt =>pmnt.invoice, {cascade: true})

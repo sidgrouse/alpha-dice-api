@@ -1,4 +1,4 @@
-import { PaymentStatus as PaymentStatus } from 'src/constants/payment-status';
+import { DebtStatus as DebtStatus } from 'src/constants/debt-status';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Invoice } from './invoice.entity';
 import { Order } from './order.entity';
@@ -11,10 +11,10 @@ export class Debt{
 
     @Column({
         type: "enum",
-        enum: PaymentStatus,
-        default: PaymentStatus.NO_INFO
+        enum: DebtStatus,
+        default: DebtStatus.NO_INFO
     })
-    status: PaymentStatus;
+    status: DebtStatus;
 
     @ManyToOne(() => Payment, pmnt => pmnt.debts)
     payment: Payment;

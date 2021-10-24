@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne } from 'typeorm';
 import { Debt } from './debt.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Payment{
@@ -12,6 +13,12 @@ export class Payment{
     @Column()
     log: string;
 
-    @OneToMany(type => Debt, debt => debt.payment)
-    debts: Debt[]
+    @Column()
+    nameFrom: string;
+
+    @OneToMany(_ => Debt, debt => debt.payment)
+    debts: Debt[];
+
+    @ManyToOne(_ => User, user => user.payments)
+    user: User;
 }

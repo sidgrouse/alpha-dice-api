@@ -11,7 +11,7 @@ import { Item } from 'src/storage/entities/item.entity';
 import { Order } from '../storage/entities/order.entity';
 import { Invoice } from 'src/storage/entities/invoice.entity';
 import { Debt } from 'src/storage/entities/debt.entity';
-import { PaymentStatus } from 'src/constants/payment-status';
+import { DebtStatus } from 'src/constants/debt-status';
 import { InvoiceDto } from 'src/dto/invoice.dto';
 import { ArgumentOutOfRangeError } from 'rxjs';
 
@@ -45,7 +45,7 @@ export class InvoiceService {
              const payment = new Debt();
              payment.invoice = inv;
              payment.order = order;
-             payment.status = PaymentStatus.NO_INFO;
+             payment.status = DebtStatus.NO_INFO;
              return payment;
             });
         order.item = item;
@@ -71,7 +71,7 @@ export class InvoiceService {
             const payment = new Debt();
             payment.order = order;
             payment.invoice = invoice;
-            payment.status = PaymentStatus.NO_INFO;
+            payment.status = DebtStatus.NO_INFO;
             return payment;
         });
         invoice.item = item;
@@ -96,7 +96,7 @@ export class InvoiceService {
         const declaredPayments = user.orders
             .flatMap(order => order.debts)
             .filter(
-                p => p.status === PaymentStatus.NO_INFO 
+                p => p.status === DebtStatus.NO_INFO 
                 && p.invoice.status === InvoiceStatus.TO_PAY
                 && invoiceIds.some(declaredInvId => p.invoice.id === declaredInvId));
         if(declaredPayments.length !== invoiceIds.length){
@@ -104,7 +104,7 @@ export class InvoiceService {
             ` Payments=${declaredPayments.map(p => p.id).join(', ')}`);
         }
                
-        declaredPayments.forEach(p => p.status = PaymentStatus.PAYMENT_DECLARED);
+        declaredPayments.forEach(p => p.status = DebtStatus.PAYMENT_DECLARED);
         console.log('declarePmnts', declaredPayments);
         await this.paymentRepository.save(declaredPayments);
 
@@ -126,7 +126,7 @@ export class InvoiceService {
         
         const invoicesToPay = user.orders
             .flatMap(order => order.debts)
-            .filter(p => p.status === PaymentStatus.NO_INFO && p.invoice.status === InvoiceStatus.TO_PAY)
+            .filter(p => p.status === DebtStatus.NO_INFO && p.invoice.status === InvoiceStatus.TO_PAY)
             .map(pmnt => new InvoiceDto(pmnt.invoice.id, pmnt.order.item.name, pmnt.order.item.project.name, pmnt.invoice.name , pmnt.invoice.amount));
 
         this.checkAssignNewUtid(user);
@@ -182,7 +182,7 @@ export class InvoiceService {
 
     private isDebtor(user: User) : boolean {
         return user.orders.flatMap(ord => ord.debts)
-            .some(p => p.status === PaymentStatus.NO_INFO && p.invoice.status === InvoiceStatus.TO_PAY)
+            .some(p => p.status === DebtStatus.NO_INFO && p.invoice.status === InvoiceStatus.TO_PAY)
     }
 
     private getIdentificationalAmount(user: User) : number {

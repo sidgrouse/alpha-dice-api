@@ -1,6 +1,7 @@
 import { ServiceModule } from 'src/services/services.module';
 import { Entity, Column, OneToMany, PrimaryGeneratedColumn, Index, OneToOne } from 'typeorm';
 import { Order } from './order.entity';
+import { Payment } from './payment.entity';
 
 @Entity()
 export class User{
@@ -29,4 +30,7 @@ export class User{
 
     @OneToMany(_ => Order, inv => inv.user)
     orders: Order[]
+    
+    @OneToMany(_ => Payment, pmnt => pmnt.user)
+    payments: Payment[]
 }
