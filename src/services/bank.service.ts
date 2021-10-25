@@ -36,9 +36,8 @@ export class BankService {
         //TODO: join name arrays
         for(let user in userDebts){
             console.log('>', user);
-            let pmnts = userPayments[user] as any; //WTF?!
-            let debts = userDebts[user] as any;
-            console.log('>>>', pmnts);
+            const pmnts = userPayments[user];
+            let debts = userDebts[user];
             const userPaymentAmount  = pmnts.reduce((sum, p) => sum += p.amount, 0);
             const userDebtAmount = debts.reduce((sum, d) => sum += d.invoice.amount, 0);
             if(userPaymentAmount >= userDebtAmount){
@@ -52,11 +51,8 @@ export class BankService {
             }
             
         }
-        userDebts.forEach(element => {
-            const t = userDebts[element.toString()]
-        });
 
-        return userPayments.length;
+        return 3;
     }
 
     private async getPayments(matches: RegExpMatchArray[]) : Promise<Payment[]> {
@@ -85,8 +81,8 @@ export class BankService {
         return ret.filter(p => p);
     }
 
-    private groupPaymentsByUser(pmnts: Payment[]) {
-        const ret : {[user: string]: Payment[]}[] = [];
+    private groupPaymentsByUser(pmnts: Payment[]) : Dictionary<Payment[]>{
+        const ret : {[user: string]: Payment[]} = {};
         return pmnts.reduce((usrGprs, pmnt) => {
             usrGprs[pmnt.user.telegramName] = usrGprs[pmnt.user.telegramName] || [];
             usrGprs[pmnt.user.telegramName].push(pmnt);
@@ -94,8 +90,8 @@ export class BankService {
         }, ret);
       }
 
-      private async getUnconfirmedDebtsByUser() : Promise<{[user: string] : Debt[]}[]>{
-          const ret : {[user: string] : Debt[]}[] = [];
+      private async getUnconfirmedDebtsByUser() : Promise<Dictionary<Debt[]>>{
+          const ret : {[user: string] : Debt[]} = {};
           const debts = await this._debtRepository.find({
               where: {status: DebtStatus.PAYMENT_DECLARED},
               relations: ["invoice", "order", "order.user"]
