@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, TransactionRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Payment } from 'src/storage/entities/payment.entity';
@@ -26,30 +26,31 @@ export class BankService {
 
         const matches = [...logs.matchAll(tinkoffRegex)];
         const allPayments = await this.getPayments(matches);
-        const userDebts = await this.getUnconfirmedDebtsByUser();
+        const debtsByUser = await this.getUnconfirmedDebtsByUser();
 
-        const userPayments = this.groupPaymentsByUser(allPayments);
+        const paymentsByUser = this.groupPaymentsByUser(allPayments);
         //console.log('p----', userPayments);
         //console.log('d----', userDebts);
         
         //TODO: 
         //TODO: join name arrays
-        for(let user in userDebts){
+        for(let user in debtsByUser){
             console.log('>', user);
-            const pmnts = userPayments[user];
-            let debts = userDebts[user];
-            const userPaymentAmount  = pmnts.reduce((sum, p) => sum += p.amount, 0);
+            const payments = paymentsByUser[user];
+            let debts = debtsByUser[user];
+            const userPaymentAmount  = payments.reduce((sum, p) => sum += p.amount, 0);
             const userDebtAmount = debts.reduce((sum, d) => sum += d.invoice.amount, 0);
-            if(userPaymentAmount >= userDebtAmount){
+            const userBalance = userPaymentAmount - userDebtAmount;
+            if(userBalance >= 0){
                 debts.forEach(d => d.status = DebtStatus.PAYMENT_CONFIRMED);
-                await this._paymentRepository.save(pmnts); //TODO: status?
-                await this._debtRepository.save(debts);
+                debtsByUser[user] = [];
             }
             else{
                 debts.forEach(d => d.status = DebtStatus.ERROR);
-                await this._debtRepository.save(debts);
             }
             
+            await this._debtRepository.save(debts);
+            await this._paymentRepository.save(payments); //TODO: status?
         }
 
         return 3;
