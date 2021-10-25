@@ -12,8 +12,8 @@ import { StorageModule } from './storage/storage.module';
     ScheduleModule.forRoot(),
     ServiceModule,
     ConfigModule,
-    StorageModule
+    StorageModule,
   ],
-  providers: [TasksService]
+  providers: [TasksService],
 })
 export class AppModule {}
