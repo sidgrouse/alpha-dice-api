@@ -25,16 +25,16 @@ export class BankService {
     ); //TODO: move to appsettings
 
     const matches = [...logs.matchAll(tinkoffRegex)];
-    const allPayments = await this.getPayments(matches);
+    const newPayments = await this.getPayments(matches);
     const debtsByUser = await this.getUnconfirmedDebtsByUser();
 
-    const paymentsByUser = this.groupPaymentsByUser(allPayments);
+    const paymentsByUser = this.groupPaymentsByUser(newPayments);
     //console.log('p----', userPayments);
     //console.log('d----', userDebts);
 
     //TODO:
     //TODO: join name arrays
-    for (const user in debtsByUser) {
+    for (const user in paymentsByUser) {
       console.log('>', user);
       const payments = paymentsByUser[user];
       const debts = debtsByUser[user];
@@ -55,7 +55,7 @@ export class BankService {
       }
 
       await this._debtRepository.save(debts);
-      await this._paymentRepository.save(payments); //TODO: status?
+      await this._paymentRepository.save(payments);
     }
 
     return 3;
@@ -67,7 +67,7 @@ export class BankService {
         const paymentAmount = parseFloat(match.groups['sum'].replace(/,/, '.'));
         const fractionalPart = paymentAmount % 10;
         const userTempId = Math.round(fractionalPart * 100);
-        if (paymentAmount) {
+        if (userTempId > 0) {
           const user = await this._userRepository.findOne({
             where: { utid: userTempId },
             relations: ['payments'],

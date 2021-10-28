@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   OneToMany,
+  CreateDateColumn,
 } from 'typeorm';
 import { Debt as Debt } from './debt.entity';
 import { Item as Item } from './item.entity';
@@ -32,4 +33,7 @@ export class Invoice {
 
   @OneToMany(() => Debt, (pmnt) => pmnt.invoice, { cascade: true })
   userDebts: Debt[];
+
+  @CreateDateColumn()
+  created_at: Date;
 }

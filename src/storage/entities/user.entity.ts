@@ -4,6 +4,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   Index,
+  CreateDateColumn,
 } from 'typeorm';
 import { Order } from './order.entity';
 import { Payment } from './payment.entity';
@@ -38,4 +39,7 @@ export class User {
 
   @OneToMany(() => Payment, (pmnt) => pmnt.user)
   payments: Payment[];
+
+  @CreateDateColumn()
+  created_at: Date;
 }
