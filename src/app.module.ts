@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { DB_NAME } from './constants';
 import { ServiceModule } from './services/services.module';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -12,8 +10,8 @@ import { StorageModule } from './storage/storage.module';
     ScheduleModule.forRoot(),
     ServiceModule,
     ConfigModule,
-    StorageModule
+    StorageModule,
   ],
-  providers: [TasksService]
+  providers: [TasksService],
 })
 export class AppModule {}
