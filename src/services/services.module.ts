@@ -7,10 +7,7 @@ import { sessionMiddleware } from 'src/common/middleware';
 import { getEnvironmentData } from 'worker_threads';
 
 import { MainTgScene } from '../telegram/main.telegram';
-import {
-  AddInvoiceTgScene,
-  DetailsAddInvoiceTgScene,
-} from 'src/telegram/add-invoice.telegram';
+import { AddInvoiceTgScene, DetailsAddInvoiceTgScene } from 'src/telegram/add-invoice.telegram';
 import { AddOrderTgScene } from 'src/telegram/add-order.telegram';
 
 import { User } from 'src/storage/entities/user.entity';
@@ -27,33 +24,20 @@ import { AddProjectTgSceneController as AddProjectTgScene } from 'src/telegram/a
 import { ProjectService } from './project.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, Item, Order, Invoice, Project, Debt]),
-    ConfigModule.forRoot({ envFilePath: 'development.env' }),
-    TelegrafModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        token:
-          configService.get('TELEGRAM_BOT_TOKEN') ||
-          getEnvironmentData('TELEGRAM_BOT_TOKEN').toString(),
-        middlewares: [sessionMiddleware],
+  imports: [TypeOrmModule.forFeature([User, Item, Order, Invoice, Project, Debt]),
+  ConfigModule.forRoot({envFilePath: 'development.env'}),
+  TelegrafModule.forRootAsync({
+    imports: [ConfigModule],
+    useFactory: (configService: ConfigService) => ({
+          token: configService.get('TELEGRAM_BOT_TOKEN') || getEnvironmentData('TELEGRAM_BOT_TOKEN').toString(),
+          middlewares: [sessionMiddleware]
       }),
-      inject: [ConfigService],
-    }),
-  ],
-  providers: [
-    InvoiceService,
-    UserService,
-    ProjectService,
-    MainTgScene,
-    AddInvoiceTgScene,
-    AddOrderTgScene,
-    DeclarePaymentTgScene,
-    AddProjectTgScene,
-    DetailsAddInvoiceTgScene,
-  ],
+      inject: [ConfigService]
+  })],
+  providers: [InvoiceService, UserService, ProjectService, 
+    MainTgScene, AddInvoiceTgScene, AddOrderTgScene, DeclarePaymentTgScene, AddProjectTgScene, DetailsAddInvoiceTgScene],
   controllers: [InvoiceController],
-  exports: [InvoiceService, UserService, ProjectService],
+  exports: [InvoiceService, UserService, ProjectService]
 })
 @Module({})
 export class ServiceModule {}
