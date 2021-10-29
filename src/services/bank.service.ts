@@ -6,6 +6,8 @@ import { Debt } from 'src/storage/entities/debt.entity';
 import { User } from 'src/storage/entities/user.entity';
 import { DebtStatus } from 'src/constants/debt-status';
 import { Repository } from 'typeorm';
+import { InvoiceService } from './invoice.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class BankService {
@@ -16,13 +18,14 @@ export class BankService {
     private _debtRepository: Repository<Debt>,
     @InjectRepository(User)
     private _userRepository: Repository<User>,
+    private _invoiceService: InvoiceService,
+    private _configService: ConfigService, //private _notificationService: NotificationService,
   ) {}
 
-  async parseLogs(logs: string): Promise<number> {
-    const tinkoffRegex = new RegExp(
-      '^(?<date>[^;]+?);[^;]+?;[^;]+?;"OK";"(?<sum>[\\d]+,[\\d]{2})";"RUB";[^;]+?;"RUB";[^;]+?;[^;]+?;[^;]+?;"(?<from>[^;"]+?)"',
-      'gm',
-    ); //TODO: move to appsettings
+  async parseLogsAndGetOwners(logs: string): Promise<string[]> {
+    const tinkoffRegexText = this._configService.get('REGEXP_TINKOFF_LOGS');
+    //console.log('----------------->', tinkoffRegexText);
+    const tinkoffRegex = new RegExp(tinkoffRegexText, 'gm');
 
     const matches = [...logs.matchAll(tinkoffRegex)];
     const allNewPayments = await this.getPayments(matches);
@@ -30,31 +33,44 @@ export class BankService {
 
     const newPaymentsByUser = this.groupPaymentsByUser(allNewPayments);
     console.log('p----', newPaymentsByUser);
-    console.log('all----', allNewPayments);
 
     for (const userName in declaredDebtsByUser) {
-      console.log('>', userName);
       const newPayments = newPaymentsByUser[userName];
       const declaredDebts = declaredDebtsByUser[userName];
       const userBalance = this.getUserBalance(newPayments, declaredDebts);
+      console.log('>current>', userName, userBalance);
       if (userBalance === 0) {
         declaredDebts.forEach((d) => (d.status = DebtStatus.PAID));
-      } else if (userBalance < 0) {
-        const totalBalance = await this.getTotalUserBalance(userName);
-        if (totalBalance > 0) {
+      } else if (userBalance > 0) {
+        declaredDebts.forEach((d) => (d.status = DebtStatus.PAID));
+        newPayments.forEach((p) => (p.checkNeeded = true));
+      } else {
+        const totalBalance = await this.getUserTotal(userName, newPayments);
+        console.log('>total>', userName, totalBalance);
+        if (totalBalance >= 0) {
           declaredDebts.forEach((d) => (d.status = DebtStatus.PAID));
         } else {
-          declaredDebts.forEach((d) => (d.status = DebtStatus.ERROR));
+          declaredDebts.forEach((d) => {
+            d.status = DebtStatus.NO_INFO;
+            d.checkNeeded = true;
+          });
         }
-      } else {
-        newPayments.forEach((p) => (p.checkNeeded = true));
       }
 
       await this._debtRepository.save(declaredDebts);
-      await this._paymentRepository.save(newPayments);
+      await this._invoiceService.checkReleaseUtId(userName);
+      //await this._notificationService.notifyDebtsToPay();
     }
 
-    return allNewPayments.length;
+    for (const userName in newPaymentsByUser) {
+      if (!declaredDebtsByUser[userName]) {
+        newPaymentsByUser[userName].forEach((p) => (p.checkNeeded = true));
+      }
+    }
+
+    console.log('all----', allNewPayments);
+    await this._paymentRepository.save(allNewPayments);
+    return allNewPayments.map((p) => p.user.telegramName);
   }
 
   private async getPayments(matches: RegExpMatchArray[]): Promise<Payment[]> {
@@ -64,7 +80,6 @@ export class BankService {
         console.log('===', paymentAmount);
         const fractionalPart = paymentAmount % 10;
         const userTempId = Math.round(fractionalPart * 100);
-        console.log('=====', userTempId);
         if (userTempId > 0) {
           const user = await this._userRepository.findOne({
             where: { utid: userTempId },
@@ -72,7 +87,7 @@ export class BankService {
           });
           if (user) {
             const payment = new Payment();
-            payment.amount = paymentAmount;
+            payment.amount = paymentAmount - fractionalPart;
             payment.payDate = new Date(match.groups['date']);
             payment.nameFrom = match.groups['from'];
             payment.log = match.toString();
@@ -117,19 +132,23 @@ export class BankService {
     return result.filter((d) => d.order.user.telegramName == userName);
   }
 
-  private async getTotalUserBalance(userName: string): Promise<number> {
+  private async getUserTotal(
+    userName: string,
+    newPayments: Payment[],
+  ): Promise<number> {
     const user = await this._userRepository.findOneOrFail({
-      where: { telegramId: userName },
+      where: { telegramName: userName },
       relations: ['payments'],
     });
     console.log('<<<<', user);
-    const totalPayment = user.payments.reduce((sum, p) => (sum += p.amount), 0);
+    const pmntAmount = user.payments.reduce((sum, p) => (sum += p.amount), 0);
+    const newPmntAmount = newPayments.reduce((sum, p) => (sum += p.amount), 0);
     const debtsHistory = await this.getDebtsHistory(userName);
     const totalDebt = debtsHistory.reduce(
       (sum, d) => (sum += d.invoice.amount),
       0,
     );
-    return totalPayment - totalDebt;
+    return pmntAmount + newPmntAmount - totalDebt;
   }
 
   private getUserBalance(payments: Payment[], debts: Debt[]): number {

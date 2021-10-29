@@ -235,9 +235,9 @@ export class InvoiceService {
     throw new InternalServerErrorException('Cannot assign an utid');
   }
 
-  private async checkReleaseUtId(telegramId: number): Promise<boolean> {
+  public async checkReleaseUtId(telegramName: string): Promise<boolean> {
     const user = await this.userRepository.findOneOrFail({
-      where: { telegramId: telegramId },
+      where: { telegramName: telegramName },
       relations: ['orders', 'orders.debts', 'orders.debts.invoice'],
     });
     if (!user.utid) {

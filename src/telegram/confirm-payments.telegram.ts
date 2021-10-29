@@ -20,7 +20,7 @@ export class ConfirmPaymentTgScene {
 
   @SceneEnter()
   onSceneEnter(): string {
-    return 'Логи сюда\n/cancel - назад в главное меню'; ///////////////////////
+    return 'Скопируй сюда логи из Тинькофф\n/cancel - назад в главное меню'; ///////////////////////
   }
 
   @Help()
@@ -35,13 +35,16 @@ export class ConfirmPaymentTgScene {
   }
 
   @On('text')
-  async onMessage(@Message() messageObject: any) {
+  async onMessage(@Message() messageObject: any, @Ctx() context: SceneCtx) {
     const message: string = messageObject.text;
     if (message.startsWith('/')) {
       return;
     }
 
-    const cnt = await this._bankService.parseLogs(message);
-    return cnt ? `${cnt} добавлено` : 'Ошибка'; /////////////////
+    const cnt = await this._bankService.parseLogsAndGetOwners(message);
+    context.scene.leave();
+    return cnt.length > 0
+      ? `Платежи для ${cnt.join(', ')} добавлены`
+      : 'Ошибка';
   }
 }

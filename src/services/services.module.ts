@@ -6,13 +6,6 @@ import { TelegrafModule } from 'nestjs-telegraf';
 import { sessionMiddleware } from 'src/common/middleware';
 import { getEnvironmentData } from 'worker_threads';
 
-import { MainTgScene } from '../telegram/main.telegram';
-import {
-  AddInvoiceTgScene,
-  DetailsAddInvoiceTgScene,
-} from 'src/telegram/add-invoice.telegram';
-import { AddOrderTgScene } from 'src/telegram/add-order.telegram';
-
 import { User } from 'src/storage/entities/user.entity';
 import { Item } from 'src/storage/entities/item.entity';
 import { Order } from '../storage/entities/order.entity';
@@ -22,11 +15,8 @@ import { Debt } from 'src/storage/entities/debt.entity';
 
 import { InvoiceService } from './invoice.service';
 import { UserService } from './user.service';
-import { DeclarePaymentTgScene } from 'src/telegram/declare-payment.telegram';
-import { AddProjectTgSceneController as AddProjectTgScene } from 'src/telegram/add-project.telegram';
 import { ProjectService } from './project.service';
 import { BankService } from './bank.service';
-import { ConfirmPaymentTgScene } from 'src/telegram/confirm-payments.telegram';
 import { Payment } from 'src/storage/entities/payment.entity';
 
 @Module({
@@ -40,7 +30,9 @@ import { Payment } from 'src/storage/entities/payment.entity';
       Debt,
       Payment,
     ]),
-    ConfigModule.forRoot({ envFilePath: 'development.env' }),
+    ConfigModule.forRoot({
+      envFilePath: ['development.env', 'local.development.env'],
+    }),
     TelegrafModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -52,20 +44,8 @@ import { Payment } from 'src/storage/entities/payment.entity';
       inject: [ConfigService],
     }),
   ],
-  providers: [
-    InvoiceService,
-    UserService,
-    ProjectService,
-    BankService,
-    MainTgScene,
-    AddInvoiceTgScene,
-    AddOrderTgScene,
-    DeclarePaymentTgScene,
-    AddProjectTgScene,
-    DetailsAddInvoiceTgScene,
-    ConfirmPaymentTgScene,
-  ],
-  controllers: [InvoiceController],
+  providers: [InvoiceService, UserService, ProjectService, BankService],
+  controllers: [InvoiceController], //TODO: move out
   exports: [InvoiceService, UserService, ProjectService, BankService],
 })
 @Module({})

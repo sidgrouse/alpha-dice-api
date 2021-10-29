@@ -4,7 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksService as TaskService } from './services/task.service';
 import { StorageModule } from './storage/storage.module';
-import { NotificationsService as NotificationService } from './services/notification.service';
+import { NotificationService } from './services/notification.service';
+import { TelegramModule } from './telegram/telegram.module';
 
 @Module({
   imports: [
@@ -12,7 +13,9 @@ import { NotificationsService as NotificationService } from './services/notifica
     ServiceModule,
     ConfigModule,
     StorageModule,
+    TelegramModule,
   ],
   providers: [TaskService, NotificationService],
+  exports: [NotificationService],
 })
 export class AppModule {}

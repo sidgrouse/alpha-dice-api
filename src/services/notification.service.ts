@@ -4,7 +4,7 @@ import { Telegraf } from 'telegraf';
 import { InvoiceService } from './invoice.service';
 
 @Injectable()
-export class NotificationsService {
+export class NotificationService {
   constructor(
     private _invoiceService: InvoiceService,
     @InjectBot() private bot: Telegraf<any>,

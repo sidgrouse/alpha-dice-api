@@ -34,6 +34,12 @@ $ npm install
 
 ## Running the app
 
+First of all you need to create a file 'local.development.env' in root dir and add a telegram bot token (check the telegram docs) like:
+
+```bash
+TELEGRAM_BOT_TOKEN=1234567890:AAE5gaX6QFZLKby77SY64j7GJ76L8666Vhk
+```
+Then
 ```bash
 # development
 $ npm run start
@@ -61,13 +67,3 @@ $ npm run test:cov
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).

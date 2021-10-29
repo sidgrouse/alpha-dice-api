@@ -16,6 +16,9 @@ export class Debt {
   })
   status: DebtStatus;
 
+  @Column({ default: false })
+  checkNeeded: boolean;
+
   @ManyToOne(() => Payment, (pmnt) => pmnt.debts)
   payment: Payment;
 
