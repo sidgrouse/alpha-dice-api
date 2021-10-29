@@ -166,7 +166,7 @@ export class InvoiceService {
       .map((usr) => new UserDto(usr.telegramId, usr.telegramName));
   }
 
-  async getAllUserDebts(telegramId: number): Promise<DebtDto> {
+  async getUserDebtsToPay(telegramId: number): Promise<DebtDto> {
     const user = await this.userRepository.findOneOrFail({
       relations: [
         'orders',

@@ -30,7 +30,7 @@ export class DeclarePaymentTgScene {
 
   @SceneEnter()
   async onSceneEnter(@Ctx() context: SceneCtx): Promise<void> {
-    this._debt = await this._invoiceService.getAllUserDebts(context.from.id);
+    this._debt = await this._invoiceService.getUserDebtsToPay(context.from.id);
 
     if (this._debt.invoices.length > 0) {
       const inlineKeyboardOrders = this._debt.invoices.map((inv) => [

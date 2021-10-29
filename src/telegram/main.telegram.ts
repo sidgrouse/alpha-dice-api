@@ -33,7 +33,7 @@ export class MainTgScene {
 
   @Command('invoices')
   async getInfo(@Ctx() context: Context): Promise<string> {
-    const debt = await this.invoiceService.getAllUserDebts(context.from.id);
+    const debt = await this.invoiceService.getUserDebtsToPay(context.from.id);
     if (debt.invoices.length === 0) {
       return 'У вас нет активных счетов на оплату';
     }

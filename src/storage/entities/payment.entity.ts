@@ -23,8 +23,11 @@ export class Payment {
   @Column()
   nameFrom: string;
 
-  @Column({ type: 'timestamptz' })
+  @Column({ type: 'datetime' })
   payDate: Date;
+
+  @Column({ default: false })
+  checkNeeded: boolean;
 
   @OneToMany(() => Debt, (debt) => debt.payment)
   debts: Debt[];

@@ -20,53 +20,51 @@ export class BankService {
 
   async parseLogs(logs: string): Promise<number> {
     const tinkoffRegex = new RegExp(
-      '^[^;]+?;[^;]+?;[^;]+?;"OK";"(?<sum>[\\d]+,[\\d]{2})";"RUB";[^;]+?;"RUB";[^;]+?;[^;]+?;[^;]+?;"(?<from>[^;"]+?)"',
+      '^(?<date>[^;]+?);[^;]+?;[^;]+?;"OK";"(?<sum>[\\d]+,[\\d]{2})";"RUB";[^;]+?;"RUB";[^;]+?;[^;]+?;[^;]+?;"(?<from>[^;"]+?)"',
       'gm',
     ); //TODO: move to appsettings
 
     const matches = [...logs.matchAll(tinkoffRegex)];
-    const newPayments = await this.getPayments(matches);
-    const debtsByUser = await this.getUnconfirmedDebtsByUser();
+    const allNewPayments = await this.getPayments(matches);
+    const declaredDebtsByUser = await this.getDeclaredDebtsByUser();
 
-    const paymentsByUser = this.groupPaymentsByUser(newPayments);
-    //console.log('p----', userPayments);
-    //console.log('d----', userDebts);
+    const newPaymentsByUser = this.groupPaymentsByUser(allNewPayments);
+    console.log('p----', newPaymentsByUser);
+    console.log('all----', allNewPayments);
 
-    //TODO:
-    //TODO: join name arrays
-    for (const user in paymentsByUser) {
-      console.log('>', user);
-      const payments = paymentsByUser[user];
-      const debts = debtsByUser[user];
-      const userPaymentAmount = payments.reduce(
-        (sum, p) => (sum += p.amount),
-        0,
-      );
-      const userDebtAmount = debts.reduce(
-        (sum, d) => (sum += d.invoice.amount),
-        0,
-      );
-      const userBalance = userPaymentAmount - userDebtAmount;
-      if (userBalance >= 0) {
-        debts.forEach((d) => (d.status = DebtStatus.PAYMENT_CONFIRMED));
-        debtsByUser[user] = [];
+    for (const userName in declaredDebtsByUser) {
+      console.log('>', userName);
+      const newPayments = newPaymentsByUser[userName];
+      const declaredDebts = declaredDebtsByUser[userName];
+      const userBalance = this.getUserBalance(newPayments, declaredDebts);
+      if (userBalance === 0) {
+        declaredDebts.forEach((d) => (d.status = DebtStatus.PAID));
+      } else if (userBalance < 0) {
+        const totalBalance = await this.getTotalUserBalance(userName);
+        if (totalBalance > 0) {
+          declaredDebts.forEach((d) => (d.status = DebtStatus.PAID));
+        } else {
+          declaredDebts.forEach((d) => (d.status = DebtStatus.ERROR));
+        }
       } else {
-        debts.forEach((d) => (d.status = DebtStatus.ERROR));
+        newPayments.forEach((p) => (p.checkNeeded = true));
       }
 
-      await this._debtRepository.save(debts);
-      await this._paymentRepository.save(payments);
+      await this._debtRepository.save(declaredDebts);
+      await this._paymentRepository.save(newPayments);
     }
 
-    return 3;
+    return allNewPayments.length;
   }
 
   private async getPayments(matches: RegExpMatchArray[]): Promise<Payment[]> {
     const ret = await Promise.all(
       matches.map(async (match) => {
         const paymentAmount = parseFloat(match.groups['sum'].replace(/,/, '.'));
+        console.log('===', paymentAmount);
         const fractionalPart = paymentAmount % 10;
         const userTempId = Math.round(fractionalPart * 100);
+        console.log('=====', userTempId);
         if (userTempId > 0) {
           const user = await this._userRepository.findOne({
             where: { utid: userTempId },
@@ -75,6 +73,7 @@ export class BankService {
           if (user) {
             const payment = new Payment();
             payment.amount = paymentAmount;
+            payment.payDate = new Date(match.groups['date']);
             payment.nameFrom = match.groups['from'];
             payment.log = match.toString();
             payment.user = user;
@@ -97,7 +96,7 @@ export class BankService {
     }, ret);
   }
 
-  private async getUnconfirmedDebtsByUser(): Promise<Dictionary<Debt[]>> {
+  private async getDeclaredDebtsByUser(): Promise<Dictionary<Debt[]>> {
     const ret: { [user: string]: Debt[] } = {};
     const debts = await this._debtRepository.find({
       where: { status: DebtStatus.PAYMENT_DECLARED },
@@ -109,5 +108,39 @@ export class BankService {
       usrGprs[debt.order.user.telegramName].push(debt);
       return usrGprs;
     }, ret);
+  }
+
+  private async getDebtsHistory(userName: string): Promise<Debt[]> {
+    const result = await this._debtRepository.find({
+      relations: ['invoice', 'order', 'order.user'],
+    });
+    return result.filter((d) => d.order.user.telegramName == userName);
+  }
+
+  private async getTotalUserBalance(userName: string): Promise<number> {
+    const user = await this._userRepository.findOneOrFail({
+      where: { telegramId: userName },
+      relations: ['payments'],
+    });
+    console.log('<<<<', user);
+    const totalPayment = user.payments.reduce((sum, p) => (sum += p.amount), 0);
+    const debtsHistory = await this.getDebtsHistory(userName);
+    const totalDebt = debtsHistory.reduce(
+      (sum, d) => (sum += d.invoice.amount),
+      0,
+    );
+    return totalPayment - totalDebt;
+  }
+
+  private getUserBalance(payments: Payment[], debts: Debt[]): number {
+    const userNewPaymentAmount = payments.reduce(
+      (sum, p) => (sum += p.amount),
+      0,
+    );
+    const userDeclaredDebtAmount = debts.reduce(
+      (sum, d) => (sum += d.invoice.amount),
+      0,
+    );
+    return userNewPaymentAmount - userDeclaredDebtAmount;
   }
 }
