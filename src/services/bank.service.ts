@@ -8,6 +8,7 @@ import { DebtStatus } from 'src/constants/debt-status';
 import { Repository } from 'typeorm';
 import { InvoiceService } from './invoice.service';
 import { ConfigService } from '@nestjs/config';
+import { InvoiceStatus } from 'src/constants/invoice-status';
 
 @Injectable()
 export class BankService {
@@ -143,7 +144,11 @@ export class BankService {
     console.log('<<<<', user);
     const pmntAmount = user.payments.reduce((sum, p) => (sum += p.amount), 0);
     const newPmntAmount = newPayments.reduce((sum, p) => (sum += p.amount), 0);
-    const debtsHistory = await this.getDebtsHistory(userName);
+    const debtsHistory = (await this.getDebtsHistory(userName)).filter(
+      (d) =>
+        d.invoice.status === InvoiceStatus.TO_PAY ||
+        d.invoice.status === InvoiceStatus.CLOSED,
+    );
     const totalDebt = debtsHistory.reduce(
       (sum, d) => (sum += d.invoice.amount),
       0,

@@ -62,8 +62,7 @@ export class MainTgScene {
   async onAdminHelp(): Promise<string> {
     return (
       '/add_invoice - выставить инвойс за существующий проект' +
-      '/pay - -----' +
-      ''
+      '/confirm_payments - парсить логи'
     );
   }
 
