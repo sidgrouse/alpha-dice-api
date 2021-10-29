@@ -1,19 +1,21 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { DB_NAME } from './constants';
 import { ServiceModule } from './services/services.module';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { TasksService } from './services/task.service';
+import { TasksService as TaskService } from './services/task.service';
 import { StorageModule } from './storage/storage.module';
+import { NotificationService } from './services/notification.service';
+import { TelegramModule } from './telegram/telegram.module';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     ServiceModule,
     ConfigModule,
-    StorageModule
+    StorageModule,
+    TelegramModule,
   ],
-  providers: [TasksService]
+  providers: [TaskService, NotificationService],
+  exports: [NotificationService],
 })
 export class AppModule {}

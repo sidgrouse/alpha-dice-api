@@ -1,30 +1,39 @@
-import { type } from 'os';
 import { InvoiceStatus } from 'src/constants/invoice-status';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Debt as Debt } from './payment.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToMany,
+  CreateDateColumn,
+} from 'typeorm';
+import { Debt as Debt } from './debt.entity';
 import { Item as Item } from './item.entity';
 
 @Entity()
-export class Invoice{
-    @PrimaryGeneratedColumn()
-    id: number;
+export class Invoice {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({
-        type: "enum",
-        enum: InvoiceStatus,
-        default: InvoiceStatus.NO_INFO
-    })
-    status: InvoiceStatus;
-    
-    @Column({default: 0})
-    amount: number
+  @Column({
+    type: 'enum',
+    enum: InvoiceStatus,
+    default: InvoiceStatus.NO_INFO,
+  })
+  status: InvoiceStatus;
 
-    @Column({default: 'K1'})
-    name: string
+  @Column({ default: 0 })
+  amount: number;
 
-    @ManyToOne(() => Item, {cascade: true, eager: true})
-    pledge: Item;
+  @Column({ default: 'K1' })
+  name: string;
 
-    @OneToMany(() => Debt, pmnt =>pmnt.invoice, {cascade: true})
-    userDebts: Debt[];
+  @ManyToOne(() => Item, { cascade: true, eager: true, nullable: true })
+  item: Item;
+
+  @OneToMany(() => Debt, (pmnt) => pmnt.invoice, { cascade: true })
+  userDebts: Debt[];
+
+  @CreateDateColumn()
+  created_at: Date;
 }
