@@ -7,6 +7,7 @@ import { ProjectStatus } from 'src/constants/project-status';
 import { Item } from 'src/storage/entities/item.entity';
 import { ItemDto } from 'src/dto/item.dto';
 import { InvoiceService } from './invoice.service';
+import { ProjectDto } from 'src/dto/project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -52,6 +53,23 @@ export class ProjectService {
     }
 
     return false;
+  }
+
+  async getAll(): Promise<ProjectDto[]> {
+    const projects = await this._projectRepository.find({
+      relations: ['items'],
+    });
+    return projects.map(
+      (p) =>
+        new ProjectDto(
+          p.id,
+          p.name,
+          p.status,
+          p.url,
+          p.details,
+          p.items.map((itm) => new ItemDto(itm.id, itm.name, p.name, p.status)),
+        ),
+    );
   }
 
   async getAllAvailableItems(): Promise<ItemDto[]> {

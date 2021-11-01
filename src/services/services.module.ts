@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { InvoiceController } from '../controllers/invoice.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { sessionMiddleware } from 'src/common/middleware';
@@ -18,6 +17,8 @@ import { UserService } from './user.service';
 import { ProjectService } from './project.service';
 import { BankService } from './bank.service';
 import { Payment } from 'src/storage/entities/payment.entity';
+import { InvoiceController } from '../controllers/invoice.controller';
+import { ProjectController } from 'src/controllers/project.controller';
 
 @Module({
   imports: [
@@ -45,7 +46,7 @@ import { Payment } from 'src/storage/entities/payment.entity';
     }),
   ],
   providers: [InvoiceService, UserService, ProjectService, BankService],
-  controllers: [InvoiceController], //TODO: move out
+  controllers: [InvoiceController, ProjectController], //TODO: move out
   exports: [InvoiceService, UserService, ProjectService, BankService],
 })
 @Module({})

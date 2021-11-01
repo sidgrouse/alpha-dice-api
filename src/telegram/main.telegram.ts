@@ -61,7 +61,7 @@ export class MainTgScene {
   @UseGuards(AdminGuard)
   async onAdminHelp(): Promise<string> {
     return (
-      '/add_invoice - выставить инвойс за существующий проект' +
+      '/add_invoice - выставить инвойс за существующий проект\n' +
       '/confirm_payments - парсить логи'
     );
   }
