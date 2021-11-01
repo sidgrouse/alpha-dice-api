@@ -23,7 +23,7 @@ export class Project {
   @Column({ length: 100, nullable: true })
   details: string;
 
-  @OneToMany(() => Item, (pldg) => pldg.project, { cascade: true })
+  @OneToMany(() => Item, (pldg) => pldg.project, { cascade: true})
   items: Item[];
 
   //comment, usercomments[]?
