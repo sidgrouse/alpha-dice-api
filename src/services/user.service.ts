@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from 'src/storage/entities/user.entity';
+import { UserDto } from 'src/dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -26,5 +27,10 @@ export class UserService {
     }
 
     //add user info
+  }
+
+  async getAll(): Promise<UserDto[]> {
+    const users = await this.userRepository.find();
+    return users.map((u) => new UserDto(u.telegramId, u.telegramName));
   }
 }
