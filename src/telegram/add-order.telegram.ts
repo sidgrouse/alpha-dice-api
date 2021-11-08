@@ -10,7 +10,7 @@ import {
 import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { SceneNames } from 'src/constants';
-import { ItemDto } from 'src/dto/item.dto';
+import { ProjectItemDto } from 'src/dto/project-item.dto';
 import { InvoiceService } from 'src/services/invoice.service';
 import { ProjectService } from 'src/services/project.service';
 import { Telegraf } from 'telegraf';
@@ -18,7 +18,7 @@ import { Telegraf } from 'telegraf';
 @UseFilters(TelegrafExceptionFilter)
 @Scene(SceneNames.ADD_ORDER)
 export class AddOrderTgScene {
-  private item: ItemDto;
+  private item: ProjectItemDto;
   constructor(
     @InjectBot() private _bot: Telegraf<any>,
     private _projectService: ProjectService,

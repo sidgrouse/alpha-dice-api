@@ -8,6 +8,8 @@ import { Item } from 'src/storage/entities/item.entity';
 import { ItemDto } from 'src/dto/item.dto';
 import { InvoiceService } from './invoice.service';
 import { ProjectDto } from 'src/dto/project.dto';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { ProjectItemDto } from 'src/dto/project-item.dto';
 
 @Injectable()
 export class ProjectService {
@@ -57,7 +59,7 @@ export class ProjectService {
 
   async getAll(): Promise<ProjectDto[]> {
     const projects = await this._projectRepository.find({
-      relations: ['items'],
+      relations: ['items', 'items.orders'],
     });
     return projects.map(
       (p) =>
@@ -67,20 +69,44 @@ export class ProjectService {
           p.status,
           p.url,
           p.details,
-          p.items.map((itm) => new ItemDto(itm.id, itm.name, p.name, p.status)),
+          p.items.map(
+            (itm) =>
+              new ItemDto(
+                itm.id,
+                itm.name,
+                itm.originalPrice,
+                itm.orders.map((ord) => ord.user.telegramName),
+              ),
+          ),
         ),
     );
   }
 
-  async getAllAvailableItems(): Promise<ItemDto[]> {
+  // TODO: remake, remove projectItem
+  async getAllAvailableItems(): Promise<ProjectItemDto[]> {
     const items = await this._itemRepository.find({ relations: ['project'] });
     return (
       items
         ////.filter(itm => itm.project.status !== ProjectStatus.NO_INFO) //TODO: apply busines logic
         .map(
           (itm) =>
-            new ItemDto(itm.id, itm.name, itm.project.name, itm.project.status),
+            // eslint-disable-next-line prettier/prettier
+            new ProjectItemDto(itm.id, itm.name, itm.project.name, itm.project.status),
         )
     ); //TODO: add details to order
+  }
+
+  public async patchProject(
+    id: number,
+    patch: QueryDeepPartialEntity<Project>,
+  ): Promise<void> {
+    await this._projectRepository.update(id, patch);
+  }
+
+  public async patchItem(
+    id: number,
+    patch: QueryDeepPartialEntity<Item>,
+  ): Promise<void> {
+    await this._itemRepository.update(id, patch);
   }
 }
