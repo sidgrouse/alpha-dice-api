@@ -1,6 +1,6 @@
 export enum InvoiceStatus {
-  NO_INFO = 'no_info',
-  WAITING = 'waiting',
-  TO_PAY = 'started',
-  CLOSED = 'closed',
+  NO_INFO = 'хз',
+  WAITING = 'ждем',
+  TO_PAY = 'платим',
+  CLOSED = 'закрыт',
 }

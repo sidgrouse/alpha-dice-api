@@ -1,5 +1,5 @@
 import { UseFilters, UseGuards } from '@nestjs/common';
-import { Update, Ctx, Start, Help, Command } from 'nestjs-telegraf';
+import { Update, Ctx, Start, Help, Command, On } from 'nestjs-telegraf';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
@@ -20,14 +20,18 @@ export class MainTgScene {
   @Start()
   async onStart(@Ctx() ctx: Context): Promise<string> {
     await this.userService.addUser(ctx.from.username, ctx.from.id);
-    return 'Привет! Вы добавлены, начните вводить / чтоб увидеть список комманд';
+    return (
+      'Привет! Вы добавлены, начните вводить / чтоб увидеть список комманд' +
+      'A еще есть табличка с проектами - http://kmatroskin.ru:4200/'
+    );
   }
 
   @Help()
   async onHelp(): Promise<string> {
     return (
-      'При оплате не забывайте добавлять указанное число копеек (до 9.99руб) к каждому вашему платежу. ' +
-      'Для просмотра списка доступных команд, начните вводить /'
+      'При оплате не забывайте добавлять указанное число копеек (до 9.99руб) к каждому вашему платежу.\n' +
+      'Для просмотра списка доступных команд, начните вводить /\n' +
+      'A еще есть табличка с проектами - http://kmatroskin.ru:4200/'
     );
   }
 
@@ -86,5 +90,13 @@ export class MainTgScene {
   @UseGuards(AdminGuard)
   async onConfirmPayments(@Ctx() context: SceneCtx) {
     await context.scene.enter(SceneNames.CONFIRM_PAYMENT);
+  }
+
+  @On('text')
+  async onMessage() {
+    return (
+      'Ничего не понятно, но очень интересно. Лучше напиши @k_matroskin\n' +
+      'A еще есть табличка с проектами - http://kmatroskin.ru:4200/'
+    );
   }
 }

@@ -24,7 +24,7 @@ export class Item {
   originalCurrencyIsoCode: string; //TODO: so currency conv can be added later
 
   @Column({ nullable: true })
-  priceK1rub: number; //TODO: discuss, add other price parts
+  discountPrice: number;
 
   @Column({ length: 100, nullable: true })
   details: string;

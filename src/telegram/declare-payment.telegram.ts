@@ -11,7 +11,7 @@ import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { SceneNames } from 'src/constants';
 import { DebtDto } from 'src/dto/debt.dto';
-import { InvoiceDto } from 'src/dto/invoice.dto';
+import { InvoiceItemDto } from 'src/dto/invoice-item.dto';
 import { InvoiceService } from 'src/services/invoice.service';
 import { Telegraf } from 'telegraf';
 
@@ -19,7 +19,7 @@ import { Telegraf } from 'telegraf';
 @UseFilters(TelegrafExceptionFilter)
 export class DeclarePaymentTgScene {
   private _debt: DebtDto;
-  private _declaredInvoices: InvoiceDto[];
+  private _declaredInvoices: InvoiceItemDto[];
 
   constructor(
     @InjectBot() private _bot: Telegraf<any>,
@@ -106,6 +106,6 @@ export class DeclarePaymentTgScene {
   @Command('cancel')
   async onCancel(@Ctx() context: SceneCtx) {
     await context.scene.leave();
-    return 'back to main menu';
+    return 'Гаааля, отмену сделай!';
   }
 }

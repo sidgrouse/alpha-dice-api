@@ -85,6 +85,6 @@ export class AddOrderTgScene {
   @Command('cancel')
   async onAddInvoice(@Ctx() context: SceneCtx) {
     await context.scene.leave();
-    return 'back to main menu';
+    return 'Гаааля, отмену сделай!';
   }
 }

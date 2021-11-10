@@ -12,7 +12,10 @@ import {
 import { AddOrderTgScene } from 'src/telegram/add-order.telegram';
 
 import { DeclarePaymentTgScene } from 'src/telegram/declare-payment.telegram';
-import { AddProjectTgSceneController as AddProjectTgScene } from 'src/telegram/add-project.telegram';
+import {
+  AddProjectTgScene,
+  AddProjectItemsTgScene,
+} from 'src/telegram/add-project.telegram';
 import { ConfirmPaymentTgScene } from 'src/telegram/confirm-payments.telegram';
 import { ServiceModule } from 'src/services/services.module';
 
@@ -39,6 +42,7 @@ import { ServiceModule } from 'src/services/services.module';
     AddProjectTgScene,
     DetailsAddInvoiceTgScene,
     ConfirmPaymentTgScene,
+    AddProjectItemsTgScene,
   ],
   exports: [],
 })

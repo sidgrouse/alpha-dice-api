@@ -1,8 +1,8 @@
-import { InvoiceDto } from './invoice.dto';
+import { InvoiceItemDto } from './invoice-item.dto';
 
 export class DebtDto {
   constructor(
-    public invoices: InvoiceDto[],
+    public invoices: InvoiceItemDto[],
     public identificationalAmount: number,
   ) {}
 

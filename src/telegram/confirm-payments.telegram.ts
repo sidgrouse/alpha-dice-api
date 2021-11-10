@@ -31,7 +31,7 @@ export class ConfirmPaymentTgScene {
   @Command('cancel')
   async onCancel(@Ctx() context: SceneCtx) {
     await context.scene.leave();
-    return 'back to main menu';
+    return 'Гаааля, отмену сделай!';
   }
 
   @On('text')

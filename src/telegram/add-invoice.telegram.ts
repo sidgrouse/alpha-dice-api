@@ -1,7 +1,6 @@
 import { UseFilters } from '@nestjs/common';
 import {
   Ctx,
-  Help,
   Command,
   Message,
   Scene,
@@ -68,11 +67,6 @@ export class AddInvoiceTgScene {
     context.scene.leave();
   }
 
-  @Help()
-  async onHelp(): Promise<string> {
-    return 'Send me invoices in format name:amount:description \n/cancel - назад в главное меню';
-  }
-
   @Command('cancel')
   async onCancel(@Ctx() context: SceneCtx) {
     await context.scene.leave();
@@ -83,14 +77,11 @@ export class AddInvoiceTgScene {
 @UseFilters(TelegrafExceptionFilter)
 @Scene(SceneNames.ADD_INVOICE_DETAILS)
 export class DetailsAddInvoiceTgScene {
-  private static _waitingMarkerConst = 'отложить';
-
   private _itemId: number;
   private _itemName: string;
   constructor(
     @InjectBot() private _bot: Telegraf<any>,
     private _invoiceService: InvoiceService,
-    private _projectService: ProjectService,
   ) {}
 
   @SceneEnter()
@@ -99,14 +90,15 @@ export class DetailsAddInvoiceTgScene {
     this._itemName = context.state.name;
     return (
       `Выставление нового инвойса за ${context.state.name}.(${context.state.itemId}) ` +
-      `Формат:\nза что:сколько[:${DetailsAddInvoiceTgScene._waitingMarkerConst}] (за что:сколько для активации)\n`
+      `Формат:\nза что:сколько[:${InvoiceStatus.WAITING}]\n\n` +
+      `Например:\nK1:5000\nДоставка:1000\nДоставка:100:${InvoiceStatus.WAITING}`
     );
   }
 
   @Command('cancel')
   async onCancel(@Ctx() context: SceneCtx) {
     await context.scene.leave();
-    return 'back to main menu';
+    return 'Гаааля, отмену сделай!';
   }
 
   @On('text')
@@ -126,7 +118,7 @@ export class DetailsAddInvoiceTgScene {
     }
 
     const status =
-      invoiceElements[2] === DetailsAddInvoiceTgScene._waitingMarkerConst
+      invoiceElements[2] === InvoiceStatus.WAITING
         ? InvoiceStatus.WAITING
         : InvoiceStatus.TO_PAY;
     this._invoiceService.addInvoice(

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { CreateProjectDto } from 'src/dto/create-project.dto';
+import { AddProjectDto } from 'src/dto/project.add.dto';
 import { ProjectDto } from 'src/dto/project.dto';
 import { ProjectService } from 'src/services/project.service';
 
@@ -14,17 +14,11 @@ export class ProjectController {
 
   @Patch(':id')
   async updateProject(@Param() id: number, @Body() projectPatch: any) {
-    console.log(id, projectPatch);
     await this.projectService.patchProject(id, projectPatch);
   }
 
   @Post()
-  async createProject(@Body() project: CreateProjectDto) {
-    await this.projectService.tryAddProject(
-      project.name,
-      project.url,
-      project.details,
-      null,
-    );
+  async createProject(@Body() project: AddProjectDto) {
+    await this.projectService.tryAddProject(project);
   }
 }

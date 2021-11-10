@@ -12,7 +12,7 @@ import { Order } from '../storage/entities/order.entity';
 import { Invoice } from 'src/storage/entities/invoice.entity';
 import { Debt } from 'src/storage/entities/debt.entity';
 import { DebtStatus } from 'src/constants/debt-status';
-import { InvoiceDto } from 'src/dto/invoice.dto';
+import { InvoiceItemDto } from 'src/dto/invoice-item.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -111,7 +111,7 @@ export class InvoiceService {
   async declarePayment(
     telegramId: number,
     invoiceIds: number[],
-  ): Promise<InvoiceDto[]> {
+  ): Promise<InvoiceItemDto[]> {
     //TODO: remake, add splitting
     console.log('invIds', invoiceIds);
     const user = await this.userRepository.findOneOrFail({
@@ -147,7 +147,7 @@ export class InvoiceService {
 
     return declaredPayments.map(
       (pmnt) =>
-        new InvoiceDto(
+        new InvoiceItemDto(
           pmnt.invoice.id,
           pmnt.order.item.name,
           pmnt.order.item.project.name,
@@ -188,7 +188,7 @@ export class InvoiceService {
       )
       .map(
         (pmnt) =>
-          new InvoiceDto(
+          new InvoiceItemDto(
             pmnt.invoice.id,
             pmnt.order.item.name,
             pmnt.order.item.project.name,

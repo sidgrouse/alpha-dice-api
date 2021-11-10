@@ -1,10 +1,10 @@
-import { InvoiceDto } from './invoice.dto';
+import { InvoiceItemDto } from './invoice-item.dto';
 
 export class PaymentConfirmationDto {
   constructor(
     public telegramName: string,
     public isFulfilled: boolean,
-    public invoices: InvoiceDto[],
+    public invoices: InvoiceItemDto[],
     public payments: PaymentDto[],
   ) {}
 }

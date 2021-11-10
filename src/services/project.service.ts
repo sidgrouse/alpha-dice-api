@@ -6,54 +6,46 @@ import { Project } from 'src/storage/entities/project.entity';
 import { ProjectStatus } from 'src/constants/project-status';
 import { Item } from 'src/storage/entities/item.entity';
 import { ItemDto } from 'src/dto/item.dto';
-import { InvoiceService } from './invoice.service';
 import { ProjectDto } from 'src/dto/project.dto';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { ProjectItemDto } from 'src/dto/project-item.dto';
+import { AddProjectDto } from 'src/dto/project.add.dto';
+import { InvoiceDto } from 'src/dto/invoice.dto';
 
 @Injectable()
 export class ProjectService {
   constructor(
-    private _invoiceService: InvoiceService,
     @InjectRepository(Project)
     private _projectRepository: Repository<Project>,
     @InjectRepository(Item)
     private _itemRepository: Repository<Item>,
   ) {}
 
-  async tryAddProject(
-    name: string,
-    url: string,
-    details: string,
-    itemsWithK1: { name: string; invoiceK1Amount: number }[],
-  ): Promise<boolean> {
+  async tryAddProject(dto: AddProjectDto): Promise<boolean> {
     const existedProject = await this._projectRepository.findOne({
-      where: { name: name },
+      where: { name: dto.name },
     });
+    console.log('existedProject', existedProject);
     if (!existedProject) {
       const project = new Project();
-      project.name = name;
-      project.items = itemsWithK1.map((itm) => {
+      project.name = dto.name;
+      project.items = dto.items.map((itm) => {
         const ret = new Item();
         ret.name = itm.name;
-        ret.priceK1rub = itm.invoiceK1Amount;
-        ret.invoices = [];
+        ret.originalPrice = itm.originalPrice;
+        ret.discountPrice = itm.discountPrice;
         return ret;
       });
       project.status = ProjectStatus.NO_INFO;
-      project.url = url;
-      project.details = details;
+      project.url = dto.url;
+      project.details = dto.details;
 
-      const result = await this._projectRepository.save(project);
-      if (result) {
-        result.items.forEach(
-          async (itm) =>
-            await this._invoiceService.addInvoice(itm.id, itm.priceK1rub, 'K1'),
-        );
-      }
+      console.log('new project', project);
+      await this._projectRepository.save(project);
       return true;
     }
 
+    console.log('project not added');
     return false;
   }
 
@@ -76,6 +68,8 @@ export class ProjectService {
                 itm.name,
                 itm.originalPrice,
                 itm.orders.map((ord) => ord.user.telegramName),
+                // eslint-disable-next-line prettier/prettier
+                itm.invoices.map(inv => new InvoiceDto(inv.name, inv.amount, inv.status))
               ),
           ),
         ),

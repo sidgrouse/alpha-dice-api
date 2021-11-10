@@ -1,15 +1,9 @@
+import { InvoiceStatus } from 'src/constants/invoice-status';
+
 export class InvoiceDto {
   constructor(
-    public invoiceId: number,
-    public itemName: string,
-    public project: string,
     public invoiceName: string,
     public amount: number,
+    public status: InvoiceStatus,
   ) {}
-
-  toString(identificationalAmount = 0): string {
-    return `${this.project}${
-      this.project === this.itemName ? ' ' : '(' + this.itemName + ') '
-    } ${this.invoiceName}(${this.amount + identificationalAmount})`;
-  }
 }
