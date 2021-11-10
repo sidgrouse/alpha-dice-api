@@ -8,6 +8,6 @@ export class ProjectDto {
     public status: ProjectStatus,
     public url: string,
     public details: string,
-    public items: ItemDto[]
+    public items: ItemDto[],
   ) {}
 }

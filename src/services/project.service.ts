@@ -51,7 +51,7 @@ export class ProjectService {
 
   async getAll(): Promise<ProjectDto[]> {
     const projects = await this._projectRepository.find({
-      relations: ['items', 'items.orders'],
+      relations: ['items', 'items.orders', 'items.invoices'],
     });
     return projects.map(
       (p) =>
@@ -67,6 +67,7 @@ export class ProjectService {
                 itm.id,
                 itm.name,
                 itm.originalPrice,
+                itm.discountPrice,
                 itm.orders.map((ord) => ord.user.telegramName),
                 // eslint-disable-next-line prettier/prettier
                 itm.invoices.map(inv => new InvoiceDto(inv.name, inv.amount, inv.status))
@@ -101,6 +102,7 @@ export class ProjectService {
     id: number,
     patch: QueryDeepPartialEntity<Item>,
   ): Promise<void> {
+    console.log(id, patch);
     await this._itemRepository.update(id, patch);
   }
 }
