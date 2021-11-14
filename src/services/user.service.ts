@@ -31,6 +31,6 @@ export class UserService {
 
   async getAll(): Promise<UserDto[]> {
     const users = await this.userRepository.find();
-    return users.map((u) => new UserDto(u.telegramId, u.telegramName));
+    return users.map((u) => new UserDto(u.id, u.telegramId, u.telegramName));
   }
 }

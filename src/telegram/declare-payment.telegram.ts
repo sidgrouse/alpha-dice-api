@@ -30,7 +30,7 @@ export class DeclarePaymentTgScene {
 
   @SceneEnter()
   async onSceneEnter(@Ctx() context: SceneCtx): Promise<void> {
-    this._debt = await this._invoiceService.getUserDebtsToPay(context.from.id);
+    this._debt = await this._invoiceService.getUserDebts(context.from.id);
 
     if (this._debt.invoices.length > 0) {
       const inlineKeyboardOrders = this._debt.invoices.map((inv) => [
@@ -89,7 +89,7 @@ export class DeclarePaymentTgScene {
 
   @Help()
   async onHelp(): Promise<string> {
-    return `Активный долг - ${this._debt.getTotal()}руб\n\n/cancel - назад в главное меню`;
+    return `Активный долг - ${this._debt.getTotalString()}руб\n\n/cancel - назад в главное меню`;
   }
 
   @Command('confirm')

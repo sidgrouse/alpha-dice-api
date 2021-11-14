@@ -10,6 +10,7 @@ import {
 } from 'nestjs-telegraf';
 import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
+import { TelegramHelper } from 'src/common/telegram-helper';
 import { SceneNames } from 'src/constants';
 import { BankService } from 'src/services/bank.service';
 
@@ -20,7 +21,7 @@ export class ConfirmPaymentTgScene {
 
   @SceneEnter()
   onSceneEnter(): string {
-    return 'Скопируй сюда логи из Тинькофф\n/cancel - назад в главное меню'; ///////////////////////
+    return 'Скопируй сюда логи из Тинькофф\n/cancel - назад в главное меню';
   }
 
   @Help()
@@ -41,10 +42,16 @@ export class ConfirmPaymentTgScene {
       return;
     }
 
-    const cnt = await this._bankService.parseLogsAndGetOwners(message);
+    const payments = await this._bankService.parseLogs(message);
+    payments.forEach(async (p) => {
+      const user = p.user.telegramName;
+      p.log = '';
+      p.user = null;
+      const text = ` <b>${user}</b> ` + JSON.stringify(p);
+      console.log('---', text);
+      await context.replyWithHTML(text);
+    });
     context.scene.leave();
-    return cnt.length > 0
-      ? `Платежи для ${cnt.join(', ')} добавлены`
-      : 'Ошибка';
+    return null;
   }
 }

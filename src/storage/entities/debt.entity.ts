@@ -16,10 +16,7 @@ export class Debt {
   })
   status: DebtStatus;
 
-  @Column({ default: false })
-  checkNeeded: boolean;
-
-  @ManyToOne(() => Payment, (pmnt) => pmnt.debts)
+  @ManyToOne(() => Payment, (pmnt) => pmnt.debts) // work on integrity rule!
   payment: Payment;
 
   @ManyToOne(() => Order, (order) => order.debts, { eager: true })

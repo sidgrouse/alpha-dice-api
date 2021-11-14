@@ -39,7 +39,7 @@ export class MainTgScene {
 
   @Command('invoices')
   async getInfo(@Ctx() context: Context): Promise<string> {
-    const debt = await this.invoiceService.getUserDebtsToPay(context.from.id);
+    const debt = await this.invoiceService.getUserDebts(context.from.id);
     if (debt.invoices.length === 0) {
       return 'У вас нет активных счетов на оплату';
     }
@@ -48,13 +48,13 @@ export class MainTgScene {
       .join('\n');
 
     return (
-      `Итого: ${debt.getTotal()}\n\n${joinedInvoices}\n\nВажно! Любой ваш платеж должен содержать ровно указанное число копеек (до 9.99руб) плюсом к ровной сумме\n` +
+      `Итого: ${debt.getTotalString()}\n\n${joinedInvoices}\n\nВажно! Любой ваш платеж должен содержать ровно указанное число копеек (до 9.99руб) плюсом к ровной сумме\n` +
       `Копейки не являются частью платежа, а служат для его идентификации как вашего, поэтому их нужно прибавить лишь один раз на каждый платеж.\n` +
       `Например, если вы пока готовы перевести 1000р за один проект и 2000 за другой одним платежом, то необходимо сложить эти суммы,` +
       `прибавить ${debt.identificationalAmount}р. и перевести ${
         3000 + debt.identificationalAmount
       }. Либо не заморачивайтесь и просто ` +
-      `переведите ${debt.getTotal()}`
+      `переведите ${debt.getTotalString()}`
     );
   }
 

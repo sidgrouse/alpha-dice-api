@@ -13,7 +13,7 @@ export class NotificationService {
   async notifyDebtsToPay() {
     const debptors = await this._invoiceService.getDebptors();
     debptors.forEach(async (user) => {
-      const debt = await this._invoiceService.getUserDebtsToPay(
+      const debt = await this._invoiceService.getUserDebts(
         user.telegramId,
       );
       const debtDetails = debt.invoices
@@ -24,7 +24,7 @@ export class NotificationService {
         )
         .join('\n'); //TODO: helper?
       let message =
-        `*Активные платежи за игры*\nИтого: ${debt.getTotal()}\nДетали:\n${debtDetails}\n\n` +
+        `*Активные платежи за игры*\nИтого: ${debt.getTotalString()}\nДетали:\n${debtDetails}\n\n` +
         `Не забудьте добавить ${debt.identificationalAmount.toFixed(
           2,
         )} к каждому переводу для идентификации его как вашего\n\n` +

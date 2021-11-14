@@ -5,6 +5,7 @@ import {
   OneToMany,
   ManyToOne,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Debt } from './debt.entity';
 import { User } from './user.entity';
@@ -14,20 +15,20 @@ export class Payment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   amount: number;
 
-  @Column()
+  @Column({ nullable: true })
   log: string;
 
-  @Column()
+  @Column({ nullable: true })
   nameFrom: string;
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'datetime', nullable: true })
   payDate: Date;
 
   @Column({ default: false })
-  checkNeeded: boolean;
+  confirmed: boolean;
 
   @OneToMany(() => Debt, (debt) => debt.payment)
   debts: Debt[];
@@ -35,6 +36,9 @@ export class Payment {
   @ManyToOne(() => User, (user) => user.payments)
   user: User;
 
+  @UpdateDateColumn()
+  updatedAt: Date;
+
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 }

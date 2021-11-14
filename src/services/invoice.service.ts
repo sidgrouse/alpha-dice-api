@@ -13,6 +13,7 @@ import { Invoice } from 'src/storage/entities/invoice.entity';
 import { Debt } from 'src/storage/entities/debt.entity';
 import { DebtStatus } from 'src/constants/debt-status';
 import { InvoiceItemDto } from 'src/dto/invoice-item.dto';
+import { Payment } from 'src/storage/entities/payment.entity';
 
 @Injectable()
 export class InvoiceService {
@@ -20,13 +21,15 @@ export class InvoiceService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(Item)
-    private _itemRepository: Repository<Item>,
+    private itemRepository: Repository<Item>,
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
     @InjectRepository(Invoice)
     private invoiceRepository: Repository<Invoice>,
     @InjectRepository(Debt)
-    private paymentRepository: Repository<Debt>,
+    private debtRepository: Repository<Debt>,
+    @InjectRepository(Payment)
+    private paymentRepository: Repository<Payment>,
   ) {}
 
   async addOrder(
@@ -36,7 +39,7 @@ export class InvoiceService {
   ): Promise<void> {
     const user = await this.getUserByTgId(userTelegramId);
 
-    const item = await this._itemRepository.findOneOrFail(itemId, {
+    const item = await this.itemRepository.findOneOrFail(itemId, {
       relations: ['invoices', 'invoices.userDebts'],
     });
 
@@ -71,7 +74,7 @@ export class InvoiceService {
     description: string,
     status: InvoiceStatus = InvoiceStatus.TO_PAY,
   ): Promise<void> {
-    const pledge = await this._itemRepository.findOne({
+    const pledge = await this.itemRepository.findOne({
       where: { name: itemName },
       relations: ['orders', 'orders.user'],
     });
@@ -84,7 +87,7 @@ export class InvoiceService {
     description: string,
     status: InvoiceStatus = InvoiceStatus.TO_PAY,
   ): Promise<void> {
-    const item = await this._itemRepository.findOne(itemId, {
+    const item = await this.itemRepository.findOne(itemId, {
       relations: ['orders', 'orders.user'],
     });
 
@@ -126,7 +129,7 @@ export class InvoiceService {
       where: { telegramId: telegramId },
     });
 
-    const declaredPayments = user.orders
+    const declaredDebts = user.orders
       .flatMap((order) => order.debts)
       .filter(
         (p) =>
@@ -134,18 +137,23 @@ export class InvoiceService {
           p.invoice.status === InvoiceStatus.TO_PAY &&
           invoiceIds.some((declaredInvId) => p.invoice.id === declaredInvId),
       );
-    if (declaredPayments.length !== invoiceIds.length) {
+    if (declaredDebts.length !== invoiceIds.length) {
       console.error(
         `Some declared payments are not found as payable. Declared ids=${invoiceIds}.` +
-          ` Payments=${declaredPayments.map((p) => p.id).join(', ')}`,
+          ` Payments=${declaredDebts.map((p) => p.id).join(', ')}`,
       );
     }
 
-    declaredPayments.forEach((p) => (p.status = DebtStatus.PAYMENT_DECLARED));
-    console.log('declarePmnts', declaredPayments);
-    await this.paymentRepository.save(declaredPayments);
-
-    return declaredPayments.map(
+    const payment = new Payment();
+    payment.debts = declaredDebts;
+    payment.user = user;
+    const debtIds = declaredDebts.map((d) => d.id);
+    await this.paymentRepository.save(payment);
+    console.log('declarePmnt', payment);
+    await this.debtRepository.update(debtIds, {
+      status: DebtStatus.PAYMENT_DECLARED,
+    });
+    return declaredDebts.map(
       (pmnt) =>
         new InvoiceItemDto(
           pmnt.invoice.id,
@@ -163,10 +171,13 @@ export class InvoiceService {
     });
     return users
       .filter((usr) => this.isDebtor(usr))
-      .map((usr) => new UserDto(usr.telegramId, usr.telegramName));
+      .map((usr) => new UserDto(usr.id, usr.telegramId, usr.telegramName));
   }
 
-  async getUserDebtsToPay(telegramId: number): Promise<DebtDto> {
+  async getUserDebts(
+    telegramId: number,
+    debtStatus = DebtStatus.NO_INFO,
+  ): Promise<DebtDto> {
     const user = await this.userRepository.findOneOrFail({
       relations: [
         'orders',
@@ -183,8 +194,7 @@ export class InvoiceService {
       .flatMap((order) => order.debts)
       .filter(
         (p) =>
-          p.status === DebtStatus.NO_INFO &&
-          p.invoice.status === InvoiceStatus.TO_PAY,
+          p.status === debtStatus && p.invoice.status === InvoiceStatus.TO_PAY,
       )
       .map(
         (pmnt) =>
