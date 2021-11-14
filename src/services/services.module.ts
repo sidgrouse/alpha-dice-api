@@ -21,6 +21,7 @@ import { InvoiceController } from '../controllers/invoice.controller';
 import { ProjectController } from 'src/controllers/project.controller';
 import { UserController } from 'src/controllers/user.controller';
 import { ItemController } from 'src/controllers/item.controller';
+import { OrderService } from './order.service';
 
 @Module({
   imports: [
@@ -47,14 +48,26 @@ import { ItemController } from 'src/controllers/item.controller';
       inject: [ConfigService],
     }),
   ],
-  providers: [InvoiceService, UserService, ProjectService, BankService],
+  providers: [
+    InvoiceService,
+    UserService,
+    ProjectService,
+    BankService,
+    OrderService,
+  ],
   controllers: [
     InvoiceController,
     ProjectController,
     UserController,
     ItemController,
   ],
-  exports: [InvoiceService, UserService, ProjectService, BankService],
+  exports: [
+    InvoiceService,
+    UserService,
+    ProjectService,
+    BankService,
+    OrderService,
+  ],
 })
 @Module({})
 export class ServiceModule {}

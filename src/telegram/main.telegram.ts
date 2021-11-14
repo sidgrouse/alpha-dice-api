@@ -4,6 +4,7 @@ import { AdminGuard } from 'src/common/guards/admin.guard';
 import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { SceneNames } from 'src/constants';
+import { OrderService } from 'src/services/order.service';
 import { UserService } from 'src/services/user.service';
 import { Context } from 'telegraf';
 import { SceneContext } from 'telegraf/typings/scenes';
@@ -15,6 +16,7 @@ export class MainTgScene {
   constructor(
     private readonly invoiceService: InvoiceService,
     private readonly userService: UserService,
+    private readonly orderService: OrderService,
   ) {}
 
   @Start()
@@ -42,7 +44,7 @@ export class MainTgScene {
       return 'У вас нет активных счетов на оплату';
     }
     const joinedInvoices = debt.invoices
-      .map((inv) => inv.toString())
+      .map((inv) => '❗ ' + inv.toString())
       .join('\n');
 
     return (
@@ -75,6 +77,19 @@ export class MainTgScene {
     context.scene.enter(SceneNames.ADD_PROJECT);
   }
 
+  @Command('orders')
+  async getOrders(@Ctx() context: SceneCtx) {
+    const orders = await this.orderService.getUserOrderedItems(context.from.id);
+    if (orders.length === 0) {
+      return 'У вас нет активный проектов';
+    }
+    const joinedOrders = orders
+      .map((ord) => `❗ *${ord.projectName}* _${ord.itemName}_`)
+      .join('\n');
+    context.replyWithMarkdownV2('Ваши заказы:\n' + joinedOrders);
+    return null;
+  }
+
   @Command('declare_payment')
   async onDeclarePayment(@Ctx() context: SceneContext) {
     await context.scene.enter(SceneNames.DECLARE_PAYMENT);
@@ -95,7 +110,7 @@ export class MainTgScene {
   @On('text')
   async onMessage() {
     return (
-      'Ничего не понятно, но очень интересно. Есть вопросы - пиши @k_matroskin\n' +
+      'Ничего не понятно, но очень интересно.\n/help для справки. Останутся вопросы - пиши @k_matroskin\n' +
       'A еще есть табличка с проектами - http://kmatroskin.ru:4200/'
     );
   }

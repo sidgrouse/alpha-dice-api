@@ -1,3 +1,4 @@
+import { OrderStatus } from 'src/constants/order-status';
 import {
   Entity,
   Column,
@@ -16,6 +17,9 @@ export class Order {
 
   @Column({ default: 1 })
   count: number;
+
+  @Column({ default: OrderStatus.NO_INFO })
+  status: OrderStatus;
 
   @ManyToOne(() => User, (user) => user.orders, { eager: true })
   user: User;
