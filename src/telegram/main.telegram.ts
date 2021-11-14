@@ -21,7 +21,7 @@ export class MainTgScene {
   async onStart(@Ctx() ctx: Context): Promise<string> {
     await this.userService.addUser(ctx.from.username, ctx.from.id);
     return (
-      'Привет! Вы добавлены, начните вводить / чтоб увидеть список комманд' +
+      'Привет! Вы добавлены, начните вводить / чтоб увидеть список комманд\n' +
       'A еще есть табличка с проектами - http://kmatroskin.ru:4200/'
     );
   }
@@ -95,7 +95,7 @@ export class MainTgScene {
   @On('text')
   async onMessage() {
     return (
-      'Ничего не понятно, но очень интересно. Лучше напиши @k_matroskin\n' +
+      'Ничего не понятно, но очень интересно. Есть вопросы - пиши @k_matroskin\n' +
       'A еще есть табличка с проектами - http://kmatroskin.ru:4200/'
     );
   }

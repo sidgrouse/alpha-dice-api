@@ -19,19 +19,20 @@ export class NotificationService {
       const debtDetails = debt.invoices
         .map(
           (itm) =>
-            `${itm.itemName}${
-              itm.invoiceName ? '(' + itm.invoiceName + ') ' : ' '
-            } ${itm.amount + debt.identificationalAmount}руб`,
+            `❗ *${itm.project}* _${itm.itemName}_ ${itm.invoiceName} \\- ` +
+            `${itm.amount + debt.identificationalAmount}руб`,
         )
         .join('\n'); //TODO: helper?
-      this.bot.telegram.sendMessage(
-        user.telegramId,
-        `Активные платежи за игры\nИтого: ${debt.getTotal()}\nДетали:${debtDetails}\n` +
-          `Не забудьте добавить ${debt.identificationalAmount.toFixed(
-            2,
-          )} к каждому переводу для идентификации его как вашего\n\n` +
-          `/declare_payment для подтверждения платежей`,
-      );
+      let message =
+        `*Активные платежи за игры*\nИтого: ${debt.getTotal()}\nДетали:\n${debtDetails}\n\n` +
+        `Не забудьте добавить ${debt.identificationalAmount.toFixed(
+          2,
+        )} к каждому переводу для идентификации его как вашего\n\n` +
+        `/declare\\_payment для подтверждения платежей`;
+      message = message.replace(/\./g, ',');
+      this.bot.telegram.sendMessage(user.telegramId, message, {
+        parse_mode: 'MarkdownV2',
+      });
       await this.delay(100);
     });
   }

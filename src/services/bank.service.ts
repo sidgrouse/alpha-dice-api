@@ -89,7 +89,7 @@ export class BankService {
           if (user) {
             const payment = new Payment();
             payment.amount = paymentAmount - fractionalPart;
-            payment.payDate = new Date(match.groups['date']);
+            payment.payDate = this.getDate(match.groups['date']);
             payment.nameFrom = match.groups['from'];
             payment.log = match.toString();
             payment.user = user;
@@ -166,5 +166,14 @@ export class BankService {
       0,
     );
     return userNewPaymentAmount - userDeclaredDebtAmount;
+  }
+
+  getDate(dateString: string): Date {
+    const segments =
+      /(\d{1,2})\.(\d{1,2})\.(\d{1,4}) (\d{1,2}):(\d{1,2}):(\d{1,2})/gm.exec(
+        dateString,
+      );
+    const num = segments.map((itm) => Number.parseInt(itm));
+    return new Date(num[3], num[2], num[1], num[4], num[5], num[6]);
   }
 }

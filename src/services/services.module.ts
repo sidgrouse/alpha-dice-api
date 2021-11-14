@@ -20,6 +20,7 @@ import { Payment } from 'src/storage/entities/payment.entity';
 import { InvoiceController } from '../controllers/invoice.controller';
 import { ProjectController } from 'src/controllers/project.controller';
 import { UserController } from 'src/controllers/user.controller';
+import { ItemController } from 'src/controllers/item.controller';
 
 @Module({
   imports: [
@@ -47,7 +48,12 @@ import { UserController } from 'src/controllers/user.controller';
     }),
   ],
   providers: [InvoiceService, UserService, ProjectService, BankService],
-  controllers: [InvoiceController, ProjectController, UserController], //TODO: move out
+  controllers: [
+    InvoiceController,
+    ProjectController,
+    UserController,
+    ItemController,
+  ],
   exports: [InvoiceService, UserService, ProjectService, BankService],
 })
 @Module({})
