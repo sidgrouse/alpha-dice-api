@@ -3,7 +3,7 @@ import { ServiceModule } from './services/services.module';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksService as TaskService } from './services/task.service';
-import { StorageModule } from './storage/storage.module';
+//import { StorageModule } from './storage/storage.module';
 import { NotificationService } from './services/notification.service';
 import { TelegramModule } from './telegram/telegram.module';
 
@@ -12,7 +12,7 @@ import { TelegramModule } from './telegram/telegram.module';
     ScheduleModule.forRoot(),
     ServiceModule,
     ConfigModule,
-    StorageModule,
+    //StorageModule,
     TelegramModule,
   ],
   providers: [TaskService, NotificationService],

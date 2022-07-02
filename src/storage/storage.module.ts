@@ -2,14 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DB_NAME } from 'src/constants';
 
-import { Order } from './entities/order.entity';
-import { User } from './entities/user.entity';
-import { Item } from './entities/item.entity';
-import { Invoice } from './entities/invoice.entity';
-import { Project } from './entities/project.entity';
-import { Debt } from './entities/debt.entity';
-import { Payment } from './entities/payment.entity';
-
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -23,7 +15,7 @@ import { Payment } from './entities/payment.entity';
       cli: {
         migrationsDir: 'migrations',
       },
-      entities: [User, Item, Order, Invoice, Project, Debt, Payment],
+      entities: [],
       synchronize: true,
     }),
   ],

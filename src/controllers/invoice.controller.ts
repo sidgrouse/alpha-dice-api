@@ -1,13 +1,13 @@
 import { Controller, Get } from '@nestjs/common';
-import { UserDto } from 'src/dto/user.dto';
-import { InvoiceService } from '../services/invoice.service';
+import { DebtDto as DebptDto } from 'src/dto/debt.dto';
+import { FinanceService } from 'src/services/finance.service';
 
 @Controller('invoice')
-export class InvoiceController {
-  constructor(private readonly invoiceService: InvoiceService) {}
+export class FinanceController {
+  constructor(private readonly _fnanceService: FinanceService) {}
 
   @Get()
-  async getAllInvoices(): Promise<UserDto[]> {
-    return this.invoiceService.getDebptors();
+  async getDebpts(): Promise<DebptDto[]> {
+    return this._fnanceService.getDebptors();
   }
 }

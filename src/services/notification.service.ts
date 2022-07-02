@@ -1,40 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
-import { InvoiceService } from './invoice.service';
+import { FinanceService } from './finance.service';
+import { UserService } from './user.service';
 
 @Injectable()
 export class NotificationService {
   constructor(
-    private _invoiceService: InvoiceService,
+    private _userService: UserService,
+    private _financeService: FinanceService,
     @InjectBot() private bot: Telegraf<any>,
   ) {}
 
   async notifyDebtsToPay() {
-    const debptors = await this._invoiceService.getDebptors();
-    debptors.forEach(async (user) => {
-      const debt = await this._invoiceService.getUserDebts(
-        user.telegramId,
-      );
-      const debtDetails = debt.invoices
-        .map(
-          (itm) =>
-            `❗ *${itm.project}* _${itm.itemName}_ ${itm.invoiceName} \\- ` +
-            `${itm.amount + debt.identificationalAmount}руб`,
-        )
-        .join('\n'); //TODO: helper?
-      let message =
-        `*Активные платежи за игры*\nИтого: ${debt.getTotalString()}\nДетали:\n${debtDetails}\n\n` +
-        `Не забудьте добавить ${debt.identificationalAmount.toFixed(
-          2,
-        )} к каждому переводу для идентификации его как вашего\n\n` +
-        `/declare\\_payment для подтверждения платежей`;
+    const debptors = await this._financeService.getDebptors();
+    debptors.forEach(async (debpt) => {
+      const chatId = await this._userService.getTelegramIdByName(debpt.userName);
+      let message = 'здрасьте, я коллектор';
       message = message.replace(/\./g, ',');
-      this.bot.telegram.sendMessage(user.telegramId, message, {
+      this.bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'MarkdownV2',
       });
-      await this.delay(100);
     });
+
+    await this.delay(100);
   }
 
   private delay(ms: number) {

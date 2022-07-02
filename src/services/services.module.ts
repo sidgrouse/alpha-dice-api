@@ -1,39 +1,14 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { sessionMiddleware } from 'src/common/middleware';
 import { getEnvironmentData } from 'worker_threads';
-
-import { User } from 'src/storage/entities/user.entity';
-import { Item } from 'src/storage/entities/item.entity';
-import { Order } from '../storage/entities/order.entity';
-import { Invoice } from 'src/storage/entities/invoice.entity';
-import { Project } from 'src/storage/entities/project.entity';
-import { Debt } from 'src/storage/entities/debt.entity';
-
-import { InvoiceService } from './invoice.service';
+import { FinanceController } from '../controllers/invoice.controller';
+import { Module } from '@nestjs/common';
+import { FinanceService } from './finance.service';
 import { UserService } from './user.service';
-import { ProjectService } from './project.service';
-import { BankService } from './bank.service';
-import { Payment } from 'src/storage/entities/payment.entity';
-import { InvoiceController } from '../controllers/invoice.controller';
-import { ProjectController } from 'src/controllers/project.controller';
-import { UserController } from 'src/controllers/user.controller';
-import { ItemController } from 'src/controllers/item.controller';
-import { OrderService } from './order.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      User,
-      Item,
-      Order,
-      Invoice,
-      Project,
-      Debt,
-      Payment,
-    ]),
     ConfigModule.forRoot({
       envFilePath: ['development.env', 'local.development.env'],
     }),
@@ -48,26 +23,9 @@ import { OrderService } from './order.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [
-    InvoiceService,
-    UserService,
-    ProjectService,
-    BankService,
-    OrderService,
-  ],
-  controllers: [
-    InvoiceController,
-    ProjectController,
-    UserController,
-    ItemController,
-  ],
-  exports: [
-    InvoiceService,
-    UserService,
-    ProjectService,
-    BankService,
-    OrderService,
-  ],
+  providers: [FinanceService, UserService],
+  controllers: [FinanceController],
+  exports: [FinanceService, UserService],
 })
 @Module({})
 export class ServiceModule {}

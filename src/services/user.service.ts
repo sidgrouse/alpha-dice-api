@@ -1,36 +1,33 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-
-import { User } from 'src/storage/entities/user.entity';
 import { UserDto } from 'src/dto/user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-  ) {}
+  private static _users: UserDto[] = [];
 
   async addUser(name: string, telegramId: number): Promise<void> {
     console.log('Adding a user');
-    const existedUser = await this.userRepository.findOne({
-      where: { telegramId: telegramId },
-    });
+    const existedUser = UserService._users.find(
+      (u) => u.telegramId == telegramId,
+    );
 
     console.log('existed', existedUser);
     if (!existedUser) {
-      const user = new User();
+      const user = new UserDto(telegramId, name);
       user.telegramName = name;
       user.telegramId = telegramId;
-      await this.userRepository.save(user);
+      UserService._users.push(user);
+      console.log(UserService._users);
     }
 
     //add user info
   }
 
-  async getAll(): Promise<UserDto[]> {
-    const users = await this.userRepository.find();
-    return users.map((u) => new UserDto(u.id, u.telegramId, u.telegramName));
+  async getTelegramIdByName(name: string): Promise<number> {
+    console.log(UserService._users);
+    console.log('name', name);
+    const user = UserService._users.find((u) => u.telegramName == name);
+    console.log(user.telegramId);
+    return user.telegramId;
   }
 }
