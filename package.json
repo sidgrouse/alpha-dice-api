@@ -29,6 +29,7 @@
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/schedule": "^1.0.1",
     "@nestjs/typeorm": "^8.0.2",
+    "google-spreadsheet": "^3.3.0",
     "mysql2": "^2.3.0",
     "nestjs": "^0.0.1",
     "nestjs-telegraf": "^2.4.0",

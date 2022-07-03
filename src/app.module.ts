@@ -6,6 +6,7 @@ import { TasksService as TaskService } from './services/task.service';
 //import { StorageModule } from './storage/storage.module';
 import { NotificationService } from './services/notification.service';
 import { TelegramModule } from './telegram/telegram.module';
+import { SheetsModule } from './sheets/sheets.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { TelegramModule } from './telegram/telegram.module';
     ConfigModule,
     //StorageModule,
     TelegramModule,
+    SheetsModule,
   ],
   providers: [TaskService, NotificationService],
   exports: [NotificationService],

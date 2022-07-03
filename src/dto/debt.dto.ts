@@ -1,3 +1,7 @@
 export class DebtDto {
-  constructor(public userName: string, public balance: number) {}
+  constructor(
+    public name: string,
+    public telegramId: number,
+    public balance: number,
+  ) {}
 }

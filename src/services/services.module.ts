@@ -6,12 +6,11 @@ import { FinanceController } from '../controllers/invoice.controller';
 import { Module } from '@nestjs/common';
 import { FinanceService } from './finance.service';
 import { UserService } from './user.service';
+import { SheetsModule } from 'src/sheets/sheets.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: ['development.env', 'local.development.env'],
-    }),
+    SheetsModule,
     TelegrafModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

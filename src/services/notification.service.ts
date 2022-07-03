@@ -15,10 +15,8 @@ export class NotificationService {
   async notifyDebtsToPay() {
     const debptors = await this._financeService.getDebptors();
     debptors.forEach(async (debpt) => {
-      const chatId = await this._userService.getTelegramIdByName(debpt.userName);
-      let message = 'здрасьте, я коллектор';
-      message = message.replace(/\./g, ',');
-      this.bot.telegram.sendMessage(chatId, message, {
+      let message = `Вы должны ${debpt.balance.toLocaleString()} рублей денях\n*Копейки важны\\!* Напишите _/help_ для инструкции по переводу`.replace('.','\\.');
+      this.bot.telegram.sendMessage(debpt.telegramId, message, {
         parse_mode: 'MarkdownV2',
       });
     });
@@ -30,3 +28,6 @@ export class NotificationService {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
+
+//replace:
+//'_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'
