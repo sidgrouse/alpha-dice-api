@@ -13,7 +13,7 @@ import { Context } from 'telegraf';
 export class MainTgScene {
   constructor(
     private readonly _userService: UserService,
-    private readonly _financeService: BalanceService,
+    private readonly _balanceService: BalanceService,
   ) {}
 
   @Start()
@@ -32,6 +32,22 @@ export class MainTgScene {
       'При оплате не забывайте добавлять указанное число копеек (до 9.99руб) к каждому вашему платежу.\n' +
       'Для просмотра списка доступных команд, начните вводить /\n'
     );
+  }
+
+  @Command('balance')
+  async onBalanceRequest(@Ctx() ctx: Context): Promise<string> {
+    const balance = await this._balanceService.getBalanceInfo(ctx.from.username);
+    return `Баланс плюс (аванс)${balance.bPlus}\nБаланс минус (задолженность)${balance.bMinus}\n\nПлатить ВОТ СТОЛЬКО (здесь сумма + личный ID)${balance.balance}`;
+  }
+
+  @Command('invoice')
+  async onInvoicesRequest(): Promise<string> {
+    return 'пока пусто';
+  }
+
+  @Command('payments')
+  async onPaymentsRequest(): Promise<string> {
+    return 'пока пусто';
   }
 
   @Command('admin')

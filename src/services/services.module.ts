@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common';
 import { BalanceService } from './balance.service';
 import { UserService } from './user.service';
 import { SheetsModule } from 'src/sheets/sheets.module';
+import { InvoiceService } from './invoice.service';
 
 @Module({
   imports: [
@@ -22,9 +23,9 @@ import { SheetsModule } from 'src/sheets/sheets.module';
       inject: [ConfigService],
     }),
   ],
-  providers: [BalanceService, UserService],
+  providers: [BalanceService, InvoiceService, UserService],
   controllers: [FinanceController],
-  exports: [BalanceService, UserService],
+  exports: [BalanceService, InvoiceService, UserService],
 })
 @Module({})
 export class ServiceModule {}
