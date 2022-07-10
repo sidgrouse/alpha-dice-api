@@ -1,10 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
 import { DebtDto as DebptDto } from 'src/dto/debt.dto';
-import { FinanceService } from 'src/services/finance.service';
+import { BalanceService } from 'src/services/balance.service';
 
 @Controller('invoice')
 export class FinanceController {
-  constructor(private readonly _fnanceService: FinanceService) {}
+  constructor(private readonly _fnanceService: BalanceService) {}
 
   @Get()
   async getDebpts(): Promise<DebptDto[]> {

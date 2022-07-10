@@ -4,7 +4,7 @@ import { sessionMiddleware } from 'src/common/middleware';
 import { getEnvironmentData } from 'worker_threads';
 import { FinanceController } from '../controllers/invoice.controller';
 import { Module } from '@nestjs/common';
-import { FinanceService } from './finance.service';
+import { BalanceService } from './balance.service';
 import { UserService } from './user.service';
 import { SheetsModule } from 'src/sheets/sheets.module';
 
@@ -22,9 +22,9 @@ import { SheetsModule } from 'src/sheets/sheets.module';
       inject: [ConfigService],
     }),
   ],
-  providers: [FinanceService, UserService],
+  providers: [BalanceService, UserService],
   controllers: [FinanceController],
-  exports: [FinanceService, UserService],
+  exports: [BalanceService, UserService],
 })
 @Module({})
 export class ServiceModule {}

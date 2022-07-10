@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 export class SpreadsheetService {
   constructor(private _configService: ConfigService) {}
 
-  public async getRows(): Promise<any[]> {
+  public async getRows<TModel>(sheetTitle: string): Promise<TModel[]> {
     const doc = new GoogleSpreadsheet(
       this._configService.get('SPREADSHEET_ID'),
     );
@@ -25,7 +25,8 @@ export class SpreadsheetService {
     });
 
     await doc.loadInfo(); // loads document properties and worksheets
-    const sheet = doc.sheetsByIndex[0]; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
-    return await sheet.getRows(); // can pass in { limit, offset }
+    const sheet = doc.sheetsByTitle[sheetTitle]; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+    const ret = await sheet.getRows(); // can pass in { limit, offset }
+    return ret as TModel[];
   }
 }

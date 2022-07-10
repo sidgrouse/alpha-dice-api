@@ -1,40 +1,52 @@
 import { Injectable } from '@nestjs/common';
-import { UserDto } from 'src/dto/user.dto';
+import { USER_SHEET_NAME } from 'src/constants';
 import { SpreadsheetService } from 'src/sheets/spreadsheet.service';
 
 @Injectable()
 export class UserService {
-  private static _users: UserDto[] = [];
+  private _usersPromise: Promise<IUser[]>;
 
-  constructor(private _spreadsheetService: SpreadsheetService) {}
+  constructor(private _spreadsheetService: SpreadsheetService) {
+    this._usersPromise = new Promise<IUser[]>(async (resolve) => {
+      const users = await this.refreshUserCache();
+      resolve(users);
+    });
+  }
 
-  async addUser(name: string, telegramId: number): Promise<void> {
+  async registerUser(telegramName: string, telegramId: number): Promise<void> {
     console.log('Adding a user');
+    const users = await this._usersPromise;
+    console.log('cache', users);
 
-    const rows = await this._spreadsheetService.getRows();
-    console.log('rows', rows);
-
-    const userRow = rows.find(
-      (r) => r.contact_id == name || r.contact_id == '@' + name,
+    const userRow = users.find(
+      (r) => r.name == telegramName || r.name == '@' + telegramName,
     );
 
-    console.log('existed', userRow);
-    if (userRow && !userRow.telegram_id) {
-      userRow.telegram_id = telegramId;
+    if (userRow && !userRow.telegramId) {
+      userRow.telegramId = telegramId;
       userRow.save();
       console.log('saved');
+      this._usersPromise = new Promise<IUser[]>(async (resolve) => {
+        const users = await this.refreshUserCache();
+        resolve(users);
+      });
     }
-
-    //add user info
   }
 
   async getTelegramIdByName(name: string): Promise<number> {
-    //TODO: add cache
-    const rows = await this._spreadsheetService.getRows();
-
-    const userRow = rows.find(
-      (r) => r.contact_id == name || r.contact_id == '@' + name,
-    );
-    return userRow.telegram_id;
+    const users = await this._usersPromise;
+    const userRow = users.find((r) => r.name == name || r.name == '@' + name);
+    return userRow.telegramId;
   }
+
+  private async refreshUserCache(): Promise<IUser[]> {
+    return await this._spreadsheetService.getRows<IUser>(USER_SHEET_NAME);
+  }
+}
+
+export interface IUser {
+  name: string;
+  telegramId: number;
+  realName: string;
+  save();
 }

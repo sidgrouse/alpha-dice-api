@@ -1,14 +1,9 @@
-export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
-export const INVOICE_REPOSITORY = 'INVOICE_REPOSITORY';
-export const DB_NAME = 'AlphaDiceDb';
-export const CRON_INVOICE_NOTIFICATIONS = '15,45 * * * * *';
+export const INVOICE_SHEET_NAME = 'инвойсы';
+export const BALANCE_SHEET_NAME = 'ФБаланс';
+export const USER_SHEET_NAME = 'CRM';
 
-export const enum SceneNames {
-  ADD_INVOICE = 'ADD_INVOICE',
-  ADD_ORDER = 'ADD_ORDER',
-  DECLARE_PAYMENT = 'DECLARE_PAYMENT',
-  ADD_PROJECT = 'ADD_PROJECT',
-  ADD_INVOICE_DETAILS = 'ADD_INVOICE_DETAILS',
-  CONFIRM_PAYMENT = 'CONFIRM_PAYMENT',
-  ADD_PROJECT_DETAILS = 'ADD_PROJECT_DETAILS',
-}
+export const ADMIN_IDS = [1098810534] as const;
+
+export const CRON_INVOICE_NOTIFICATIONS = '2,32 * * * * *';
+
+export const DB_NAME = 'not_used';

@@ -3,7 +3,7 @@ import { Update, Ctx, Start, Help, Command, On } from 'nestjs-telegraf';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
-import { FinanceService } from 'src/services/finance.service';
+import { BalanceService } from 'src/services/balance.service';
 import { UserService } from 'src/services/user.service';
 import { Context } from 'telegraf';
 // import { SceneContext } from 'telegraf/typings/scenes';
@@ -13,13 +13,17 @@ import { Context } from 'telegraf';
 export class MainTgScene {
   constructor(
     private readonly _userService: UserService,
-    private readonly _financeService: FinanceService,
+    private readonly _financeService: BalanceService,
   ) {}
 
   @Start()
   async onStart(@Ctx() ctx: Context): Promise<string> {
-    await this._userService.addUser(ctx.from.username, ctx.from.id);
-    return 'Привет! Вы добавлены, начните вводить / чтоб увидеть список комманд\n';
+    try {
+      await this._userService.registerUser(ctx.from.username, ctx.from.id);
+      return 'Привет! Вы добавлены, начните вводить / чтоб увидеть список комманд\n';
+    } catch (e) {
+      return 'Не удалось вас добавить. Обратитесь к кому-нибудь умному().';
+    }
   }
 
   @Help()
@@ -30,34 +34,11 @@ export class MainTgScene {
     );
   }
 
-  @Command('add_order')
-  async addOrder(@Ctx() context: SceneCtx) {
-    // context.scene.enter(SceneNames.ADD_ORDER);
-  }
-
-  @Command('admin') // TODO: move to help with check
+  @Command('admin')
   @UseGuards(AdminGuard)
   async onAdminHelp(): Promise<string> {
-    return (
-      '/add_invoice - выставить инвойс за существующий проект\n' +
-      '/confirm_payments - парсить логи'
-    );
+    return 'пока пусто';
   }
-
-/*
-  @Command('orders')
-  async getOrders(@Ctx() context: SceneCtx) {
-    const orders = await this.orderService.getUserOrderedItems(context.from.id);
-    if (orders.length === 0) {
-      return 'У вас нет активный проектов';
-    }
-    const joinedOrders = orders
-      .map((ord) => `❗ *${ord.projectName}* _${ord.itemName}_`)
-      .join('\n');
-    context.replyWithMarkdownV2('Ваши заказы:\n' + joinedOrders);
-    return null;
-  }
-*/
 
   @On('text')
   async onMessage() {
