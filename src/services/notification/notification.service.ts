@@ -25,11 +25,10 @@ export class NotificationService {
           debpt.balance.toLocaleString(),
         );
         const message = `Вы должны ${balance} рублей денях\n*Копейки важны\\!* Напишите _/help_ для инструкции по переводу`;
-        this.bot.telegram.sendMessage(debpt.telegramId, message, {
+        await this.bot.telegram.sendMessage(debpt.telegramId, message, {
           parse_mode: 'MarkdownV2',
         });
-        await this.delay(100);
-      } catch (e) { // TODO: why dont catch Error: 403: Forbidden: bot was blocked by the user
+      } catch (e) { // TODO: check catch Error: 403: Forbidden: bot was blocked by the user
         console.log('ERROR', e);
         console.log('MSG', message);
       }
@@ -54,22 +53,26 @@ export class NotificationService {
     const knownInvoices = newInvoices.filter((d) => d.userId);
     const unknownInvoices = newInvoices.filter((d) => !d.userId);
 
-    knownInvoices.forEach(async (invoice) => {
-      try {
-        const balance = NotificationService.escapeMessage(
-          invoice.content.total.toLocaleString(),
-        );
-        const message = `✏ Обнаружен новый инвойс за *${invoice.content.item}* \\(${invoice.content.comment}\\)\n${balance} рублей\\.`;
-        this.bot.telegram.sendMessage(invoice.userId, message, {
-          parse_mode: 'MarkdownV2',
-        });
-        invoice.content.status = InvoiceStatus.NOTIFIED;
-        invoice.content.save();
-      } catch (e) { // TODO: why dont catch Error: 403: Forbidden: bot was blocked by the user
-        console.log('ERROR', e);
-        unknownInvoices.push(invoice);
-      }
-    });
+    await Promise.allSettled(
+      knownInvoices.map(async (invoice) => {
+        try {
+          const balance = NotificationService.escapeMessage(
+            invoice.content.total.toLocaleString(),
+          );
+          // eslint-disable-next-line prettier/prettier
+          const message = `✏ Обнаружен новый инвойс за *${NotificationService.escapeMessage(invoice.content.item)}* \\(${NotificationService.escapeMessage(invoice.content.comment)}\\)\n${balance} рублей\\.`;
+          await this.bot.telegram.sendMessage(invoice.userId, message, {
+            parse_mode: 'MarkdownV2',
+          });
+
+          invoice.content.status = InvoiceStatus.NOTIFIED;
+          invoice.content.save();
+        } catch (e) {
+          console.log('ERROR', e);
+          unknownInvoices.push(invoice);
+        }
+      }),
+    );
 
     unknownInvoices.forEach((x) => {
       x.content.status = InvoiceStatus.PROBLEMS;
@@ -80,7 +83,8 @@ export class NotificationService {
     let message = `Разослано ${knownInvoices.length} инвойсов.`;
     if (unknownInvoices.length > 0) {
       message += `\n\nОбнаружены проблемные инвойсы:\n${unknownInvoices
-        .map((x) => `${x.content.name} ${x.content.item}`)
+        // eslint-disable-next-line prettier/prettier
+        .map((x) => `${x.content.name} ${(x.content.item)}`)
         .join('\n')}`;
     }
     await this.notifyAdmins(message);

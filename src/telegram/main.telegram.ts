@@ -68,7 +68,7 @@ export class MainTgScene {
       'Последние платежи:\n\n' +
       payments
         // eslint-disable-next-line prettier/prettier
-        .map((p) => `💲 ${p.amount} (${p.payDate}) за ${p.project} [${p.category}]: `)
+        .map((p) => `💲 ${p.amount} (${p.payDate})` + (p.project ? ` за ${p.project}` : '')  + (p.category ? ` [${p.category}]` : ''))
         .join('\n')
     );
   }

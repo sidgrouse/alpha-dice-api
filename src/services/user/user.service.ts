@@ -34,7 +34,6 @@ export class UserService {
   }
 
   async getTelegramIdByName(name: string): Promise<number> {
-    console.log('==', name);
     const users = await this._usersPromise;
     const userRow = users.find((r) => r.name == name || r.name == '@' + name);
     return userRow?.telegramId;

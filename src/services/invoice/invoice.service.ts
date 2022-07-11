@@ -32,9 +32,7 @@ export class InvoiceService {
   ): Promise<IInvoice[]> {
     const rows = await this._dataService.getRows<IInvoice>(INVOICE_SHEET_NAME);
     const payments = rows
-      .filter(
-        (x) => (x.name == userName || x.name == '@' + userName) && x.status,
-      )
+      .filter((x) => x.name == userName || x.name == '@' + userName)
       .slice(-limit);
 
     console.log('paym', payments);
