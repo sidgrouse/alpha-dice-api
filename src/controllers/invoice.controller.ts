@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { DebptDto as DebptDto } from 'src/dto/debpt.dto';
-import { BalanceService } from 'src/services/balance.service';
+import { BalanceService } from 'src/services/balance/balance.service';
 
 @Controller('invoice')
 export class FinanceController {

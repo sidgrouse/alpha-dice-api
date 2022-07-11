@@ -3,7 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import {
   CRON_BALANCE_NOTIFICATIONS,
   CRON_INVOICE_NOTIFICATIONS,
-} from '../constants';
+} from '../../constants';
 import { NotificationService } from './notification.service';
 
 @Injectable()

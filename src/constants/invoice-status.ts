@@ -1,5 +1,6 @@
 export enum InvoiceStatus {
-  WAITING = 'плоти',
+  CREATED = '',
+  NEW = 'новый',
   NOTIFIED = 'уведомлен',
-  PAID = 'оплачен',
+  PROBLEMS = 'проблемы',
 }

@@ -37,7 +37,7 @@ export class UserService {
     console.log('==', name);
     const users = await this._usersPromise;
     const userRow = users.find((r) => r.name == name || r.name == '@' + name);
-    return userRow.telegramId;
+    return userRow?.telegramId;
   }
 
   private async refreshUserCache(): Promise<IUser[]> {

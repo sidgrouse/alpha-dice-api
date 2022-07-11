@@ -4,10 +4,11 @@ import { sessionMiddleware } from 'src/common/middleware';
 import { getEnvironmentData } from 'worker_threads';
 import { FinanceController } from '../controllers/invoice.controller';
 import { Module } from '@nestjs/common';
-import { BalanceService } from './balance.service';
-import { UserService } from './user.service';
+import { BalanceService } from './balance/balance.service';
+import { UserService } from './user/user.service';
 import { SheetsModule } from 'src/sheets/sheets.module';
-import { InvoiceService } from './invoice.service';
+import { InvoiceService } from './invoice/invoice.service';
+import { PaymentService } from './payment/payment.service';
 
 @Module({
   imports: [
@@ -23,9 +24,9 @@ import { InvoiceService } from './invoice.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [BalanceService, InvoiceService, UserService],
+  providers: [BalanceService, InvoiceService, PaymentService, UserService],
   controllers: [FinanceController],
-  exports: [BalanceService, InvoiceService, UserService],
+  exports: [BalanceService, InvoiceService, PaymentService, UserService],
 })
 @Module({})
 export class ServiceModule {}

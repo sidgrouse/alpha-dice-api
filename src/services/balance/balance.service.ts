@@ -3,7 +3,7 @@ import { BALANCE_SHEET_NAME } from 'src/constants';
 import { BalanceDto } from 'src/dto/balance.dto';
 import { DebptDto } from 'src/dto/debpt.dto';
 import { SpreadsheetService } from 'src/sheets/spreadsheet.service';
-import { UserService } from './user.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class BalanceService {
