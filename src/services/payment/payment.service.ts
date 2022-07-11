@@ -12,7 +12,6 @@ export class PaymentService {
     limit = 100,
   ): Promise<IPayment[]> {
     const rows = await this._dataService.getRows<IPayment>(PAYMENT_SHEET_NAME);
-    console.log('rows', rows);
     const payments = rows
       .filter(
         (p) =>
@@ -21,7 +20,6 @@ export class PaymentService {
       )
       .slice(-limit);
 
-    console.log('paym', payments);
     return payments;
   }
 }

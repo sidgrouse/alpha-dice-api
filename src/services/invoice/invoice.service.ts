@@ -35,7 +35,6 @@ export class InvoiceService {
       .filter((x) => x.name == userName || x.name == '@' + userName)
       .slice(-limit);
 
-    console.log('paym', payments);
     return payments;
   }
 }

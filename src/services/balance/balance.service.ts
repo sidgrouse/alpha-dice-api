@@ -31,7 +31,6 @@ export class BalanceService {
       (u) => u.name == '@' + telegramName || u.name == telegramName,
     );
 
-    console.log('balance', user);
     return new BalanceDto(user.debpt, user.bPlus, user.bMinus);
   }
 }

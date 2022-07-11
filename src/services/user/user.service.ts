@@ -14,9 +14,8 @@ export class UserService {
   }
 
   async registerUser(telegramName: string, telegramId: number): Promise<void> {
-    console.log('Adding a user');
+    console.log('Adding a user', telegramName);
     const users = await this._usersPromise;
-    console.log('cache', users);
 
     const userRow = users.find(
       (r) => r.name == telegramName || r.name == '@' + telegramName,
@@ -25,7 +24,6 @@ export class UserService {
     if (userRow && !userRow.telegramId) {
       userRow.telegramId = telegramId;
       userRow.save();
-      console.log('saved');
       this._usersPromise = new Promise<IUser[]>(async (resolve) => {
         const users = await this.refreshUserCache();
         resolve(users);

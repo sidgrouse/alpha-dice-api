@@ -1,4 +1,4 @@
-import { GoneException, HttpException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telegraf';
 import { ADMIN_IDS } from 'src/constants';
 import { InvoiceStatus } from 'src/constants/invoice-status';
@@ -19,22 +19,23 @@ export class NotificationService {
     const knownDebptors = debptors.filter((d) => d.telegramId);
     const unknownDebptors = debptors.filter((d) => !d.telegramId);
 
-    knownDebptors.forEach(async (debpt) => {
-      try {
-        const balance = NotificationService.escapeMessage(
-          debpt.balance.toLocaleString(),
-        );
-        const message = `Вы должны ${balance} рублей денях\n*Копейки важны\\!* Напишите _/help_ для инструкции по переводу`;
-        await this.bot.telegram.sendMessage(debpt.telegramId, message, {
-          parse_mode: 'MarkdownV2',
-        });
-      } catch (e) { // TODO: check catch Error: 403: Forbidden: bot was blocked by the user
-        console.log('ERROR', e);
-        console.log('MSG', message);
-      }
-    });
+    await Promise.allSettled(
+      knownDebptors.map(async (debpt) => {
+        try {
+          const balance = NotificationService.escapeMessage(
+            debpt.balance.toLocaleString(),
+          );
+          const message = `Вы должны ${balance} рублей денях\n*Копейки важны\\!* Напишите _/help_ для инструкции по переводу`;
+          await this.bot.telegram.sendMessage(debpt.telegramId, message, {
+            parse_mode: 'MarkdownV2',
+          });
+        } catch (e) { // TODO: check catch Error: 403: Forbidden: bot was blocked by the user
+          console.log('ERROR', e);
+          unknownDebptors.push(debpt);
+        }
+      }),
+    );
 
-    console.log('note to admins');
     let message = `Напомнено о долге ${knownDebptors.length} морячкам.`;
     if (unknownDebptors.length > 0) {
       message += `\n\nОбнаружены дезертиры:\n${unknownDebptors
@@ -79,7 +80,6 @@ export class NotificationService {
       x.content.save();
     });
 
-    console.log('note to admins');
     let message = `Разослано ${knownInvoices.length} инвойсов.`;
     if (unknownInvoices.length > 0) {
       message += `\n\nОбнаружены проблемные инвойсы:\n${unknownInvoices
