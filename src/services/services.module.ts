@@ -2,7 +2,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { sessionMiddleware } from 'src/common/middleware';
 import { getEnvironmentData } from 'worker_threads';
-import { FinanceController } from '../controllers/invoice.controller';
+import { UserController } from '../controllers/invoice.controller';
 import { Module } from '@nestjs/common';
 import { BalanceService } from './balance/balance.service';
 import { UserService } from './user/user.service';
@@ -25,7 +25,7 @@ import { PaymentService } from './payment/payment.service';
     }),
   ],
   providers: [BalanceService, InvoiceService, PaymentService, UserService],
-  controllers: [FinanceController],
+  controllers: [UserController],
   exports: [BalanceService, InvoiceService, PaymentService, UserService],
 })
 @Module({})
