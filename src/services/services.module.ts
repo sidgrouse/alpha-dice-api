@@ -9,6 +9,7 @@ import { UserService } from './user/user.service';
 import { SheetsModule } from 'src/sheets/sheets.module';
 import { InvoiceService } from './invoice/invoice.service';
 import { PaymentService } from './payment/payment.service';
+import { OrderService } from './order/order.service';
 
 @Module({
   imports: [
@@ -24,9 +25,21 @@ import { PaymentService } from './payment/payment.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [BalanceService, InvoiceService, PaymentService, UserService],
+  providers: [
+    BalanceService,
+    InvoiceService,
+    OrderService,
+    PaymentService,
+    UserService,
+  ],
   controllers: [UserController],
-  exports: [BalanceService, InvoiceService, PaymentService, UserService],
+  exports: [
+    BalanceService,
+    InvoiceService,
+    OrderService,
+    PaymentService,
+    UserService,
+  ],
 })
 @Module({})
 export class ServiceModule {}

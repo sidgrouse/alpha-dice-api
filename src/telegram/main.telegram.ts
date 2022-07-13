@@ -5,6 +5,7 @@ import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { BalanceService } from 'src/services/balance/balance.service';
 import { InvoiceService } from 'src/services/invoice/invoice.service';
+import { OrderService } from 'src/services/order/order.service';
 import { PaymentService } from 'src/services/payment/payment.service';
 import { UserService } from 'src/services/user/user.service';
 import { Context } from 'telegraf';
@@ -17,6 +18,7 @@ export class MainTgScene {
     private readonly _userService: UserService,
     private readonly _balanceService: BalanceService,
     private readonly _invoiceService: InvoiceService,
+    private readonly _orderService: OrderService,
     private readonly _paymentService: PaymentService,
   ) {}
 
@@ -69,6 +71,21 @@ export class MainTgScene {
       payments
         // eslint-disable-next-line prettier/prettier
         .map((p) => `💲 ${p.amount} (${p.payDate})` + (p.project ? ` за ${p.project}` : '')  + (p.category ? ` [${p.category}]` : ''))
+        .join('\n')
+    );
+  }
+
+  @Command('orders')
+  async onOrdersRequest(@Ctx() ctx: Context): Promise<string> {
+    const orders = await this._orderService.getUserWHouseOrders(ctx.from.username);
+    if (orders.length == 0){
+      return 'На складе для вас ничего не обнаружено 😒';
+    }
+    return (
+      'На складе обнаружено:\n\n' +
+      orders
+        // eslint-disable-next-line prettier/prettier
+        .map((ord) => `📦 ${ord.item}`)
         .join('\n')
     );
   }

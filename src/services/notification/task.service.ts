@@ -3,6 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import {
   CRON_BALANCE_NOTIFICATIONS,
   CRON_INVOICE_NOTIFICATIONS,
+  CRON_WH_NOTIFICATIONS,
 } from '../../constants';
 import { NotificationService } from './notification.service';
 
@@ -20,5 +21,11 @@ export class TasksService {
   async handleNewInvoices() {
     console.log('===invoices==');
     this._notificationService.notifyNewInvoices();
+  }
+
+  @Cron(CRON_WH_NOTIFICATIONS)
+  async handleNewWHouseOrders() {
+    console.log('===wh==');
+    this._notificationService.notifyNewWHouseOrders();
   }
 }

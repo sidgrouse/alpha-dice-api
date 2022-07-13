@@ -17,7 +17,7 @@ export class InvoiceService {
     const users = await this._dataService.getRows<IInvoice>(INVOICE_SHEET_NAME);
     const newInvoices = users.filter((inv) => inv.status == InvoiceStatus.NEW);
     const ret = await Promise.all(
-      newInvoices.slice(0, 10).map(async (x) => {
+      newInvoices.slice(0, 20).map(async (x) => {
         const telegramId = await this._userService.getTelegramIdByName(x.name);
         return new Envelope(telegramId, x);
       }),

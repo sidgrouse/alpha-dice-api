@@ -2,15 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { InjectBot } from 'nestjs-telegraf';
 import { ADMIN_IDS } from 'src/constants';
 import { InvoiceStatus } from 'src/constants/invoice-status';
+import { WhouseOrderStatus } from 'src/constants/warehous-order-status';
 import { Telegraf } from 'telegraf';
 import { BalanceService } from '../balance/balance.service';
 import { InvoiceService } from '../invoice/invoice.service';
+import { OrderService } from '../order/order.service';
 
 @Injectable()
 export class NotificationService {
   constructor(
     private _invoiceService: InvoiceService,
     private _financeService: BalanceService,
+    private _orderService: OrderService,
     @InjectBot() private bot: Telegraf<any>,
   ) {}
 
@@ -86,6 +89,45 @@ export class NotificationService {
         // eslint-disable-next-line prettier/prettier
         .map((x) => `${x.content.name} ${(x.content.item)}`)
         .join('\n')}`;
+    }
+    await this.notifyAdmins(message);
+  }
+
+  async notifyNewWHouseOrders() {
+    const newOrders = await this._orderService.getNewWHouseOrders();
+
+    if (newOrders.length == 0) {
+      return;
+    }
+    const knownOrders = newOrders.filter((d) => d.userId);
+    const problems = newOrders.filter((d) => !d.userId);
+
+    await Promise.allSettled(
+      knownOrders.map(async (invoice) => {
+        try {
+          // eslint-disable-next-line prettier/prettier
+          const message = `📦 На складе обнаружен *${NotificationService.escapeMessage(invoice.content.item)}*\n\n Можно забирать`;
+          await this.bot.telegram.sendMessage(invoice.userId, message, {
+            parse_mode: 'MarkdownV2',
+          });
+
+          invoice.content.status = WhouseOrderStatus.NOTIFIED;
+          invoice.content.save();
+        } catch (e) {
+          console.log('ERROR', e);
+          problems.push(invoice);
+        }
+      }),
+    );
+
+    problems.forEach((x) => {
+      x.content.status = WhouseOrderStatus.PROBLEMS;
+      x.content.save();
+    });
+
+    let message = `Разослано ${knownOrders.length} инвойсов`;
+    if (problems.length > 0) {
+      message += `\n\nОбнаружены проблемы на вкладке ЛСклад:\n${problems.length}`;
     }
     await this.notifyAdmins(message);
   }
