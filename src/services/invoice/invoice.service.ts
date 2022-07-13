@@ -30,13 +30,13 @@ export class InvoiceService {
     userName: string,
     limit = 100,
   ): Promise<IInvoice[]> {
-    userName = userName.toUpperCase();
+    userName = userName.toLowerCase();
     const rows = await this._dataService.getRows<IInvoice>(INVOICE_SHEET_NAME);
     const payments = rows
       .filter(
         (x) =>
-          x.name?.toUpperCase() === userName ||
-          x.name?.toUpperCase() === '@' + userName,
+          x.name?.toLowerCase() === userName ||
+          x.name?.toLowerCase() === '@' + userName,
       )
       .slice(-limit);
 

@@ -26,9 +26,12 @@ export class BalanceService {
   }
 
   async getBalanceInfo(telegramName: string): Promise<BalanceDto> {
+    telegramName = telegramName.toLowerCase();
     const users = await this._spreadsheetService.getRows<IUserBalance>(BALANCE_SHEET_NAME);
     const user = users.find(
-      (u) => u.name == '@' + telegramName || u.name == telegramName,
+      (u) =>
+        u.name.toLowerCase() == '@' + telegramName ||
+        u.name.toLowerCase() == telegramName,
     );
 
     return new BalanceDto(user.debpt, user.bPlus, user.bMinus);

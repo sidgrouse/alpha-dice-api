@@ -17,8 +17,9 @@ export class UserService {
     console.log('Adding a user', telegramName);
     const users = await this._usersPromise;
 
+    telegramName = telegramName.toLowerCase();
     const userRow = users.find(
-      (r) => r.name == telegramName || r.name == '@' + telegramName,
+      (r) => r.name.toLowerCase() == telegramName || r.name.toLowerCase() == '@' + telegramName,
     );
 
     if (userRow && !userRow.telegramId) {
@@ -33,7 +34,8 @@ export class UserService {
 
   async getTelegramIdByName(name: string): Promise<number> {
     const users = await this._usersPromise;
-    const userRow = users.find((r) => r.name == name || r.name == '@' + name);
+    name = name.toLowerCase();
+    const userRow = users.find((r) => r.name.toLowerCase() == name || r.name.toLowerCase() == '@' + name);
     return userRow?.telegramId;
   }
 
