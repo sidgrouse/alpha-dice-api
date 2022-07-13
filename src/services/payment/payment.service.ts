@@ -16,8 +16,8 @@ export class PaymentService {
     const payments = rows
       .filter(
         (p) =>
-          (p.telegramName.toUpperCase() === userName ||
-            p.telegramName.toUpperCase() === '@' + userName) &&
+          (p.telegramName?.toUpperCase() === userName ||
+            p.telegramName?.toUpperCase() === '@' + userName) &&
           p.check == 1,
       )
       .slice(-limit);

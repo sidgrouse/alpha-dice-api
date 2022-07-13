@@ -35,8 +35,8 @@ export class InvoiceService {
     const payments = rows
       .filter(
         (x) =>
-          x.name.toUpperCase() === userName ||
-          x.name.toUpperCase() === '@' + userName,
+          x.name?.toUpperCase() === userName ||
+          x.name?.toUpperCase() === '@' + userName,
       )
       .slice(-limit);
 
