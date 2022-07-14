@@ -1,7 +1,6 @@
 import { UseFilters, UseGuards } from '@nestjs/common';
 import { Update, Ctx, Start, Help, Command, On } from 'nestjs-telegraf';
 import { AdminGuard } from 'src/common/guards/admin.guard';
-import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
 import { BalanceService } from 'src/services/balance/balance.service';
 import { InvoiceService } from 'src/services/invoice/invoice.service';

@@ -17,6 +17,8 @@ export class NotificationService {
     @InjectBot() private bot: Telegraf<any>,
   ) {}
 
+  private _nextAcceptedTimeToBother = new Date();
+
   async notifyDebtsToPay() {
     const debptors = await this._financeService.getDebptors();
     const knownDebptors = debptors.filter((d) => d.telegramId);
@@ -132,7 +134,18 @@ export class NotificationService {
     await this.notifyAdmins(message);
   }
 
-  async notifyAdmins(message: string) {
+  public async notifyError(message: string) {
+    console.error(message);
+    if (new Date() > this._nextAcceptedTimeToBother) {
+      this.notifyAdmins(message);
+
+      this._nextAcceptedTimeToBother = new Date(
+        this._nextAcceptedTimeToBother.getTime() + 1000 * 60 * 60,
+      );
+    }
+  }
+
+  private async notifyAdmins(message: string) {
     message = '*ADMIN NOTIFICATION*\n' + NotificationService.escapeMessage(message);
     console.log('ADMIN NOTE', message);
     ADMIN_IDS.forEach(async (id) => this.bot.telegram.sendMessage(id, message, {
