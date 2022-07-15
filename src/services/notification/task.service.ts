@@ -14,30 +14,34 @@ export class TasksService {
   @Cron(CRON_BALANCE_NOTIFICATIONS)
   async handleDebptors() {
     console.log('===depbtors==');
-    await this._notificationService
-      .notifyDebtsToPay()
-      .catch(() =>
-        this._notificationService.notifyError('handleDebptors failed'),
-      );
+    try {
+      await this._notificationService.notifyDebtsToPay();
+    } catch (e) {
+      this._notificationService.notifyError('handleDebptors failed with ' + e)
+    }
   }
 
   @Cron(CRON_INVOICE_NOTIFICATIONS)
   async handleNewInvoices() {
     console.log('===invoices==');
-    await this._notificationService
-      .notifyNewInvoices()
-      .catch(() =>
-        this._notificationService.notifyError('handleNewInvoices failed'),
+    try {
+      await this._notificationService.notifyNewInvoices();
+    } catch (e) {
+      this._notificationService.notifyError(
+        'handleNewInvoices failed with ' + e,
       );
+    }
   }
 
   @Cron(CRON_WH_NOTIFICATIONS)
   async handleNewWHouseOrders() {
     console.log('===wh==');
-    await this._notificationService
-      .notifyNewWHouseOrders()
-      .catch(() =>
-        this._notificationService.notifyError('handleNewWHouseOrders failed'),
+    try {
+      await this._notificationService.notifyNewWHouseOrders();
+    } catch (e) {
+      this._notificationService.notifyError(
+        'handleNewWHouseOrders failed with ' + e,
       );
+    }
   }
 }
