@@ -8,6 +8,7 @@ export class TelegrafExceptionFilter implements ExceptionFilter {
     let message = `<b>Error</b>: ${exception.message}`;
     if (exception.message.startsWith('Google API error')){
       message = 'Гугл устал, подождите минутку';
+      console.error(message);
     }
     const telegrafHost = TelegrafArgumentsHost.create(host);
     const ctx = telegrafHost.getContext<Context>();
