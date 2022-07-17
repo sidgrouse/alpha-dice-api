@@ -10,6 +10,7 @@ import { SheetsModule } from 'src/sheets/sheets.module';
 import { InvoiceService } from './invoice/invoice.service';
 import { PaymentService } from './payment/payment.service';
 import { OrderService } from './order/order.service';
+import { HelpService } from './help/help.service';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { OrderService } from './order/order.service';
     OrderService,
     PaymentService,
     UserService,
+    HelpService,
   ],
   controllers: [UserController],
   exports: [
@@ -39,6 +41,7 @@ import { OrderService } from './order/order.service';
     OrderService,
     PaymentService,
     UserService,
+    HelpService,
   ],
 })
 @Module({})

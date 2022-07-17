@@ -1,7 +1,9 @@
 import { UseFilters, UseGuards } from '@nestjs/common';
 import { Update, Ctx, Start, Help, Command, On } from 'nestjs-telegraf';
 import { AdminGuard } from 'src/common/guards/admin.guard';
+import { SceneCtx } from 'src/common/scene-context.interface';
 import { TelegrafExceptionFilter } from 'src/common/telegram-exception-filter';
+import { SceneNames } from 'src/constants';
 import { BalanceService } from 'src/services/balance/balance.service';
 import { InvoiceService } from 'src/services/invoice/invoice.service';
 import { OrderService } from 'src/services/order/order.service';
@@ -32,11 +34,8 @@ export class MainTgScene {
   }
 
   @Help()
-  async onHelp(): Promise<string> {
-    return (
-      'При оплате не забывайте добавлять указанное число копеек (до 9.99руб) к каждому вашему платежу.\n' +
-      'Для просмотра списка доступных команд, начните вводить /\n'
-    );
+  async onHelp(@Ctx() context: SceneCtx) {
+    context.scene.enter(SceneNames.GET_HELP);
   }
 
   @Command('balance')

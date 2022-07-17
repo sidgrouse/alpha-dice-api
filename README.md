@@ -24,7 +24,7 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Telegram bot for helping out with kickstarter joint purchases management.
 
 ## Installation
 

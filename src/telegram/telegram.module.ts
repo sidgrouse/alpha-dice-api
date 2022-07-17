@@ -6,6 +6,7 @@ import { getEnvironmentData } from 'worker_threads';
 
 import { MainTgScene } from '../telegram/main.telegram';
 import { ServiceModule } from 'src/services/services.module';
+import { HelpTgScene } from './help.telegram';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { ServiceModule } from 'src/services/services.module';
       inject: [ConfigService],
     }),
   ],
-  providers: [MainTgScene],
+  providers: [MainTgScene, HelpTgScene],
   exports: [],
 })
 @Module({})
